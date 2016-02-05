@@ -12,16 +12,17 @@ import java.io.Serializable;
  *
  *@warning 0 length intervals are NOT currently allowed, but support may be added in the future
  */
-public final class SimpleInterval implements Locatable, Serializable {
+public class SimpleInterval implements Locatable, Serializable {
 
     private static final long serialVersionUID = 1L;
     public static final char CONTIG_SEPARATOR = ':';
     public static final char START_END_SEPARATOR = '-';
     public static final String END_OF_CONTIG = "+"; //note: needs to be a String because it's used in an endsWith call.
 
-    private final int start;
-    private final int end;
-    private final String contig;
+    protected int start;
+    protected int end;
+    protected String contig;
+
 
     /**
      * Create a new immutable 1-based interval of the form [start, end]
@@ -44,6 +45,9 @@ public final class SimpleInterval implements Locatable, Serializable {
     public SimpleInterval(final Locatable locatable){
         this(Utils.nonNull(locatable).getContig(),
                 locatable.getStart(), locatable.getEnd());
+    }
+
+    public SimpleInterval() {
     }
 
     /**

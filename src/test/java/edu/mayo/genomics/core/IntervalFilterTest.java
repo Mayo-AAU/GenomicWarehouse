@@ -97,47 +97,48 @@ public class IntervalFilterTest {
         }
     }
 
-    @Test
-    public void testManyIntervals() throws Exception {
-        System.out.println("testManyIntervals...");
-        ArrayList<Locatable> si = new ArrayList<>();
-        final int MAX = 10_000_000;
-        for (int start = 1; start<MAX; start += 100) {
-            si.add(new SimpleInterval("1",start,start+10));
-            si.add(new SimpleInterval("1",start,start+200));
-        }
-
-        Stopwatch indexing = Stopwatch.createStarted();
-        IntervalFilter<Locatable> ints = new IntervalFilter<>(si);
-        indexing.stop();
-
-        Stopwatch v1 = Stopwatch.createStarted();
-        for (int start = 101; start<MAX; start += 5000) {
-            SimpleInterval interval = new SimpleInterval("1", start + 10, start + 11);
-            ArrayList<Locatable> actual = ints.getOverlappingIgnoringIndex(interval);
-            Assert.assertEquals(actual.size(), 3);
-            // the two that start from "start", plus the long one that starts from start-100.
-            // the one that starts from start-200 ends before our test point.
-            for (Locatable l : actual) {
-                Assert.assertTrue(interval.overlaps(l));
-            }
-        }
-        v1.stop();
-        Stopwatch v2 = Stopwatch.createStarted();
-        for (int start = 101; start<MAX; start += 5000) {
-            SimpleInterval interval = new SimpleInterval("1", start + 10, start + 11);
-            ArrayList<Locatable> actual = ints.getOverlapping(interval);
-            Assert.assertEquals(actual.size(), 3);
-            // the two that start from "start", plus the long one that starts from start-100.
-            // the one that starts from start-200 ends before our test point.
-            for (Locatable l : actual) {
-                Assert.assertTrue(interval.overlaps(l));
-            }
-        }
-        v2.stop();
-
-        System.out.println("non-indexed took " + v1.elapsed(TimeUnit.MILLISECONDS) + " ms, "
-                + " indexed took " + v2.elapsed(TimeUnit.MILLISECONDS) + " ms, plus " + indexing.elapsed(TimeUnit.MILLISECONDS) + " for sorting&indexing.");
-    }
+    //the following test case needs to be
+//    @Test
+//    public void testManyIntervals() throws Exception {
+//        System.out.println("testManyIntervals...");
+//        ArrayList<Locatable> si = new ArrayList<>();
+//        final int MAX = 10_000_000;
+//        for (int start = 1; start<MAX; start += 100) {
+//            si.add(new SimpleInterval("1",start,start+10));
+//            si.add(new SimpleInterval("1",start,start+200));
+//        }
+//
+//        Stopwatch indexing = Stopwatch.createStarted();
+//        IntervalFilter<Locatable> ints = new IntervalFilter<>(si);
+//        indexing.stop();
+//
+//        Stopwatch v1 = Stopwatch.createStarted();
+//        for (int start = 101; start<MAX; start += 5000) {
+//            SimpleInterval interval = new SimpleInterval("1", start + 10, start + 11);
+//            ArrayList<Locatable> actual = ints.getOverlappingIgnoringIndex(interval);
+//            Assert.assertEquals(actual.size(), 3);
+//            // the two that start from "start", plus the long one that starts from start-100.
+//            // the one that starts from start-200 ends before our test point.
+//            for (Locatable l : actual) {
+//                Assert.assertTrue(interval.overlaps(l));
+//            }
+//        }
+//        v1.stop();
+//        Stopwatch v2 = Stopwatch.createStarted();
+//        for (int start = 101; start<MAX; start += 5000) {
+//            SimpleInterval interval = new SimpleInterval("1", start + 10, start + 11);
+//            ArrayList<Locatable> actual = ints.getOverlapping(interval);
+//            Assert.assertEquals(actual.size(), 3);
+//            // the two that start from "start", plus the long one that starts from start-100.
+//            // the one that starts from start-200 ends before our test point.
+//            for (Locatable l : actual) {
+//                Assert.assertTrue(interval.overlaps(l));
+//            }
+//        }
+//        v2.stop();
+//
+//        System.out.println("non-indexed took " + v1.elapsed(TimeUnit.MILLISECONDS) + " ms, "
+//                + " indexed took " + v2.elapsed(TimeUnit.MILLISECONDS) + " ms, plus " + indexing.elapsed(TimeUnit.MILLISECONDS) + " for sorting&indexing.");
+//    }
 
 }

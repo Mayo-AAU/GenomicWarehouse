@@ -13,9 +13,7 @@ import java.io.Serializable;
  *
  */
 public class Kit implements Serializable {
-    int kID;       //the kit's ID
-    String path;   //the location of the bed file for the kit
-    String contig; //_landmark
-
-
+    int kID;         //the kit's ID
+    String kitName;  //e.g. 'custom capture'
+    String path;   //the (hdfs) location of the bed file for the kit
 }

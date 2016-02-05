@@ -1,0 +1,139 @@
+
+###################################################################
+#SampleMeta
+{
+	_id : UUID // Generate my own unique ID inside sample loader
+	sample : 'MySample',
+	kit_id : "SimplexoCustomCapture",
+	study_id : "Simplexo",
+	tumorType : 'Breast',
+	tumor : true,
+	status : 'case',
+	age : 35,
+	patient_id : 1290344
+}
+
+###################################################################
+#Variant
+{
+	// index seqID, minBP, maxBP
+	_id: {seqID : "10", minBP: 10000, maxBP : 10001, ref : "G", alt : "A" },
+	
+	kit_id : ["1","2","15"], // Gets inserted during ETL
+
+	// faceted search optimization, only for use in common query features
+	// this saves index space
+	annoFacet : [
+		{ K: "cava_impact", V : "HIGH" },
+		{ K: "cava_gene",   V : "BRCA2" },
+		{ K: "ExAC_AF",     V : 0.002 }
+	],
+	// Not all these need to be indexed
+	anno : {
+		cava_transcript : "ENST00001212" ,
+		cava_CSN : 	  "c.1234C>T_p.R336*",
+		HGMD_CLASS: 	  "DM?",
+		ClinVar_Class :   ["Pathogenic","Not Pathogenic"]
+		ExAC_AC :    	  21,
+		ExAC_AN : 	  66340,
+		EXAC_het:	  15,
+		ExAC_hom:	  3,
+		VEST3Score:	  0.99,
+		VEST3Call:	  D
+	},
+	Notes:[
+		{user: "m087494", call: "Pathogenic", date: 10012015, PMID: 1202030, note : "Functional data has shown this is pathogenic"},
+		{user: "m089999", call: "Benign", date: 10012014, note : "I cant find any literature to support calling this pathogenic or VUS"},
+	]
+},
+#SV Deletion
+{	
+	_id: {seqID : "10", minBP: 10000, maxBP : 50001, ref : "G", alt : "DEL" } 
+	CIPOS : "-16,20",
+	CIEND :  "-100,250",
+	type : "SV",
+	ref : "G",
+	alt : "DEL",
+	kit_id : ["1","2","15"],
+	needsAnno : 1,
+	Notes:[
+		{user: "m087494", call: "Pathogenic", date: 10012015}
+	]
+},
+#Translocation
+{
+	_id: {seqID : "2", minBP: 321680, maxBP : 321682, ref : "G", alt : "[13:123457[", seqID2 : "13", minBP2: 123456, maxBP2: 123458 }, 
+	seqID : "2",
+	minBP : 321680,
+	maxBP : 321682,
+	seqID2 : "13",
+	minBP2 : "123456",
+	maxBP2 : "123458",
+	CIPOS : "-1,1",
+	CIEND :  "-1,1",
+	CIPOS2 : "-1,1",
+	CIEND2 :  "-1,1",
+	type : "BND",
+	ref : "G",
+	alt : "13:123457[",
+	kID : ["1","2","15"],
+	gene1 : "BRCA2",
+	impact : "HIGH",
+	gene2 : "KRAS",
+	Notes:[
+		{user: "m087494", call: "benign", date: 10012015, note : "This is a false positive"}
+	]
+}
+
+###################################################################
+# FormatData
+{
+	_id : {seqID : "10", minBP: 10000, maxBP : 10001, ref : "G", alt : "A" } #First part of shard key
+	sID : "34823047389578fdf8ds907gd", #sample ID # 2nd part of shard key
+	GT : "./1",
+	PL : "0,24,1045",
+	AD_1 : 23,
+	AD_2 : 44,
+	GQ : 40,
+	HQ : "24,40",
+	DP : 20,
+	MIN_DP : 20,
+	gene : "BRCA2", 
+	sgV : 1 #sanger validated,
+	GTC : 1
+	bitSet : 000110101010101001 // We can encode a bunch of stuff into bitflags to condense size & speed
+//	Example of CNV/Range variant
+//	_id : {seqID : "10", minBP: 10000, maxBP : 10001, ref : "G", alt : "A", seqID2: "13", minBP2: 20001 , maxBP2: 30003}
+},
+{	#Copy number
+	_id : {seqID : "10", minBP: 10000, maxBP : 50001, ref : "G", alt : "DEL" }, # variant ID
+	sID : "34823047389578fdf8ds907gd", #sample ID
+	GT : "./1",
+	GQ : 20,
+	CN : 1, #Copy Number
+	MIN_DP : 20,
+	AD_1 : 23,
+	AD_2 : 44,
+	sgV : 1 #sanger validated,
+	GTC : 1,
+	bitSet : 000110101010101001
+},
+#Translocation
+{
+	id : {seqID : "10", minBP: 10000, maxBP : 10001, ref : "G", alt : "A", seqID2: "13", minBP2: 20001 , maxBP2: 30003}
+        bitSet : 000110101010101001
+        GT : "./1",
+        GQ : 20,
+        MIN_DP : 20
+}
+
+###################################################################
+#Kit
+{
+	kID : 1,
+	kit_name : "capture",
+	_landmark : "1",
+	_minBP : 1000,
+	_maxBP : 2000
+}
+
