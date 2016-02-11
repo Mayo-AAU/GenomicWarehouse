@@ -6,3 +6,8 @@ http://hortonworks.com/webinar/hortonworks-technical-workshop-streamline-hadoop-
 
 Spark Remote Debugging:
 https://community.hortonworks.com/articles/15030/spark-remote-debugging.html
+
+Hadoop MiniClusters
+http://www.lopakalogic.com/articles/hadoop-articles/hadoop-testing-with-minicluster/
+And here:
+https://github.com/sakserv/hadoop-mini-clusters
