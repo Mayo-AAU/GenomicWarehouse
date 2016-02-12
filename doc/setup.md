@@ -28,7 +28,7 @@ EOF
 Then change `resolv.conf`:
 
 ```bash
-cat << 'EOF' > /etc/resolv.conf
+sudo tee /etc/resolv.conf > /dev/null <<'EOF'
 search mayo.edu
 nameserver 129.176.171.5
 EOF

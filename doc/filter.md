@@ -2,9 +2,9 @@
 
 Include only certain records in a newly created `.vcf`.
 
-A Filter needs to be done in near real time, just like VCF-Miner.  Here is a relevent query that touches both INFO (Annotation) and sample information.
+A Filter needs to be done in near real time, just like VCF-Miner.  Here is a relevant query that touches both INFO (Annotation) and sample information.
 
-Degrees of fredom:
+Degrees of freedom:
 - Number of machines in the cluster
 - Number of variants
 - Number of samples
