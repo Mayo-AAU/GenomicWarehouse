@@ -1,14 +1,12 @@
 // Remove all the info junk...
 sc.setLogLevel("WARN")
 
+val vcfFilename = "vcf/NA_1401601612.gvcf.bz2"
+var numPartitions = sc.defaultMinPartitions
 
-<<<<<<< Updated upstream
-val vcfHDFS = sc.textFile("vcf/NA_1401601612.gvcf")
-=======
 val vcfHDFS = sc.textFile(vcfFilename, numPartitions)
 
 print ( "Found " + vcfHDFS.partitions.length + " partitions for " + vcfFilename)
->>>>>>> Stashed changes
 
 // each record in vcfHDFS is an array of the words
 // get rid of spaces, and map to lower case
@@ -37,7 +35,7 @@ print ( "difference is " + difference/1000)
 /*
 The awk version...
 
-bzcat 1KG.chr22.anno.infocol.vcf.bz2 |  awk '!/#/ {
+time bunzip2 -c NA_1401601612.gvcf.bz2 |  awk '!/#/ {
  Ch[$1]++;
  }
  END{
