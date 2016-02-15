@@ -7,3 +7,15 @@ The goal here is to scale with the number of 'sequencers'.  The assumption is th
 The scaling experiment verifies that adding additional inputs from sequencers scales linearly with adding additional hardware on the cluster.
 
 > 'Spark may be a great place to do the ingest' -Dan B 2016
+
+# Experimental design
+
+Develop code to do the following:
+
+1. Read VCF data from HDFS
+2. Populate Hadoop systems (HBase, HDFS, ORC, etc) to facilitate [filtering](filter.md), [recalculation](recalculate.md), and [export](export.md)
+
+Test the following:
+
+1. Scale with many concurrent ingestion processing running
+2. Scale with large amounts of data previously ingested

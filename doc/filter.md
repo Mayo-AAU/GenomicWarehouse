@@ -1,6 +1,6 @@
 # Filter
 
-Include only certain records in a newly created `.vcf`.
+Include only certain records in an in-memory virtual `.vcf`.
 
 A Filter needs to be done in near real time, just like VCF-Miner.  Here is a relevant query that touches both INFO (Annotation) and sample information.
 

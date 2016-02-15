@@ -13,8 +13,8 @@ Vagrant.configure(2) do |config|
   
   # Install Cloudbreak when the Vagrant is started
   config.vm.provision "shell" do |s|
-    s.path: "install_cloudbreak.sh"
-    s.args = "#{ PUBLIC_IP[ip]}"
+    s.path = "install_cloudbreak.sh"
+    # s.args = "#{ PUBLIC_IP[ip]}"
   end
   
   config.vm.provider "virtualbox" do |v|

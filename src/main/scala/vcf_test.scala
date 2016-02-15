@@ -2,7 +2,13 @@
 sc.setLogLevel("WARN")
 
 
+<<<<<<< Updated upstream
 val vcfHDFS = sc.textFile("vcf/NA_1401601612.gvcf")
+=======
+val vcfHDFS = sc.textFile(vcfFilename, numPartitions)
+
+print ( "Found " + vcfHDFS.partitions.length + " partitions for " + vcfFilename)
+>>>>>>> Stashed changes
 
 // each record in vcfHDFS is an array of the words
 // get rid of spaces, and map to lower case

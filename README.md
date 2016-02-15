@@ -1,4 +1,5 @@
 # GenomicWarehouse
+
 This is an open source project that attempts to answer important genomics questions on the big data platform
 
 Make sure you develop using Java SDK 1.8+
@@ -11,13 +12,35 @@ Make sure you develop using Java SDK 1.8+
 4. [Filter](doc/filter.md)
 5. [Interaction](doc/interaction.md)
 
+## Setup requirements
+
+- Essentials
+  - [ ] **DJB** Be able to scale cluster up and down as needed
+  - [ ] **DJB** [Hortonworks Data Platform](http://hortonworks.com/hdp/) v 2.3 installed on Azure
+  - [ ] Install Java v8
+  - [ ] HDFS
+  - [ ] Spark
+  - [ ] HBase
+  - [ ] Create infrastructure for evaluation
+	 1. [local sandbox](doc/setup.md) for testing / development
+	 2. "small cluster", 3x 8C/32G/10T+
+	 3. "medium cluster", 5x 8C/32G/10T+
+	 4. "large cluster", 7x 8C/32G/10T+
+- Optional, but nice to have
+  - [ ] Jypter
+  - [ ] Zepplin
+
 ## Plan
 
+<<<<<<< Updated upstream
 - [ ] Create infrastructure for evaluation
 	1. [local sandbox](doc/setup.md) for testing / development
 	2. "small cluster", 4x 8C/32G/10T+
 	3. "medium cluster", 8x 8C/32G/10T+
 	3. "large cluster", 32x 8C/32G/10T+
+=======
+- [ ] **DJQ** Test/Dev environment https://github.com/drachimera/HadoopCommons
+>>>>>>> Stashed changes
 - [ ] Write [ingest code](doc/ingest.md)
    1. create schema in HBase
    2. ingest sample `.gvcf` files
@@ -26,13 +49,7 @@ Make sure you develop using Java SDK 1.8+
 - [ ] Load sample datasets
 - [ ] Write [export code](doc/export.md)
 - [ ] Write [recalculate code](doc/recalculate.md)
-- [ ] Write final report
+- [ ] **DJQ** Write final report *Google Doc*
 
-## Big Hairy Audacious Goals (BHAGs)
 
-This project is a "jugular experiment".  It is designed to evaluate if the [Hadoop](https://hadoop.apache.org/) big data platform is suitable for analytics on genomic data.
-
-- copy `VCF` files to HDFS
-- index `VCF` from HDFS into HBase
-- perform standard queries againist `VCF` data in HBase
 

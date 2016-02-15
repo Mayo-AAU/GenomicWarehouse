@@ -14,4 +14,4 @@ Runtime Experiment Variables of Freedom:
 
 ## Experiment
 
-Assume [ingest](ingest) is working properly.  Continue adding `VCF` files.  After each ingestion, run a series of recalculations and measure wall time vs. number of nodes.
+Assume [ingest](ingest.md) is working properly.  Continue adding `VCF` files.  After each ingestion, run a series of recalculations and measure wall time vs. number of nodes.
