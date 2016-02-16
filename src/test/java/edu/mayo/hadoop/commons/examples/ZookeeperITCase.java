@@ -1,20 +1,21 @@
 package edu.mayo.hadoop.commons.examples;
 
-import com.github.sakserv.minicluster.config.ConfigVars;
-import com.github.sakserv.minicluster.impl.ZookeeperLocalCluster;
-import edu.mayo.hadoop.commons.minicluster.MiniClusterUtil;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Properties;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.Properties;
+import com.github.sakserv.minicluster.config.ConfigVars;
+import com.github.sakserv.minicluster.impl.ZookeeperLocalCluster;
 
-import static org.junit.Assert.assertEquals;
+import edu.mayo.hadoop.commons.minicluster.MiniClusterUtil;
 
 /**
- * Created by m102417 on 2/12/16.
- * checks that Zookeeper is up and running and correctly responds to queries on localhost
+ * Created by m102417 on 2/12/16. checks that Zookeeper is up and running and
+ * correctly responds to queries on localhost
  */
 public class ZookeeperITCase {
 
@@ -35,9 +36,8 @@ public class ZookeeperITCase {
      * tests that zookeeper is up and running
      */
     @Test
-    public void running(){
+    public void running() {
         ZookeeperLocalCluster zookeeperLocalCluster = MiniClusterUtil.getZookeeperLocalCluster();
-        assertEquals(prop.getProperty(ConfigVars.ZOOKEEPER_CONNECTION_STRING_KEY),
-                zookeeperLocalCluster.getZookeeperConnectionString());
+        assertEquals(prop.getProperty(ConfigVars.ZOOKEEPER_CONNECTION_STRING_KEY), zookeeperLocalCluster.getZookeeperConnectionString());
     }
 }
