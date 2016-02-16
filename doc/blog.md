@@ -54,7 +54,11 @@ time bunzip2 -c NA_1401601612.gvcf.bz2 |  awk '!/#/ {
 
 It took `535 seconds` to run (`user	8m55.572s`).  Hmm, suspiciously, this looks like the same amount of time for the Spark version. I'm guessing we're dominated by disk and/or decompression.
 
+<<<<<<< HEAD
 If instead of letting Spark determine the number of partitions, [let's choose the number](http://www.bigsynapse.com/spark-input-output).
+=======
+If instead of letting Spark determine the number of partitions, let's choose the number.
+>>>>>>> Thoughts on Spark performance
 
 ```scala
 val vcfFilename = "vcf/NA_1401601612.gvcf.bz2"
