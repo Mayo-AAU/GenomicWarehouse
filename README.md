@@ -16,7 +16,7 @@ Make sure you develop using Java SDK 1.8+
 
 - Essentials
   - [ ] **DJB** Be able to scale cluster up and down as needed
-  - [ ] **DJB** [Hortonworks Data Platform](http://hortonworks.com/hdp/) v 2.3 installed on Azure
+  - [ ] **DJB** [Hortonworks Data Platform](http://hortonworks.com/hdp/) `v2.3` installed on Azure
   - [ ] Install Java v8
   - [ ] HDFS
   - [ ] Spark
@@ -32,15 +32,7 @@ Make sure you develop using Java SDK 1.8+
 
 ## Plan
 
-<<<<<<< Updated upstream
-- [ ] Create infrastructure for evaluation
-	1. [local sandbox](doc/setup.md) for testing / development
-	2. "small cluster", 4x 8C/32G/10T+
-	3. "medium cluster", 8x 8C/32G/10T+
-	3. "large cluster", 32x 8C/32G/10T+
-=======
 - [ ] **DJQ** Test/Dev environment https://github.com/drachimera/HadoopCommons
->>>>>>> Stashed changes
 - [ ] Write [ingest code](doc/ingest.md)
    1. create schema in HBase
    2. ingest sample `.gvcf` files

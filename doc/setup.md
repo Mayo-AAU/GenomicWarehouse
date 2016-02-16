@@ -1,3 +1,7 @@
+# Setup HDP on Azure
+
+Start with a base [HDP "marketplace install"]()
+
 # Setting up Hortonworks HDP Sandbox
 
 Download the [sandbox environment](http://hortonworks.com/products/hortonworks-sandbox/#install) from HortonWorks.  The Sandbox is **batteries included** and quite useful for playing around.
