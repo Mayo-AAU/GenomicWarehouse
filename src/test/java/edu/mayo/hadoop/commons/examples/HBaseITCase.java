@@ -1,6 +1,8 @@
 package edu.mayo.hadoop.commons.examples;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,8 +11,21 @@ import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.TableName;
+<<<<<<< 4dd8acfe7995aa8e913e4386aefff43b91bc8376
 import org.apache.hadoop.hbase.client.*;
+=======
+import org.apache.hadoop.hbase.ZooKeeperConnectionException;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
+>>>>>>> Converts to HBase 2 APIs
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -19,8 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.sakserv.minicluster.config.ConfigVars;
+import com.google.protobuf.ServiceException;
 
-import edu.mayo.hadoop.commons.hbase.HBaseConnector;
 import edu.mayo.hadoop.commons.hbase.HBaseUtil;
 import edu.mayo.hadoop.commons.minicluster.MiniClusterUtil;
 
@@ -55,38 +70,38 @@ public class HBaseITCase {
 
         LOG.info("Establishing a connection with HBase");
         Configuration configuration = MiniClusterUtil.getHbaseLocalCluster().getHbaseConfiguration();
-        HBaseConnector hcon = new HBaseConnector(configuration);
-        HBaseUtil hutil = new HBaseUtil(hcon);
+        try (Connection hcon = ConnectionFactory.createConnection(configuration)) {
+            HBaseUtil hutil = new HBaseUtil(hcon);
 
-        LOG.info("Drop Tables in case things did not cleanup correctly in the past");
-        hutil.dropAll();
+            LOG.info("Drop Tables in case things did not cleanup correctly in the past");
+            hutil.dropAll();
 
-        String tableName = props.getProperty(ConfigVars.HBASE_TEST_TABLE_NAME_KEY);
-        String colFamName = props.getProperty(ConfigVars.HBASE_TEST_COL_FAMILY_NAME_KEY);
-        String colQualiferName = props.getProperty(ConfigVars.HBASE_TEST_COL_QUALIFIER_NAME_KEY);
-        Integer numRowsToPut = Integer.parseInt(props.getProperty(ConfigVars.HBASE_TEST_NUM_ROWS_TO_PUT_KEY));
+            String tableName = props.getProperty(ConfigVars.HBASE_TEST_TABLE_NAME_KEY);
+            String colFamName = props.getProperty(ConfigVars.HBASE_TEST_COL_FAMILY_NAME_KEY);
+            String colQualiferName = props.getProperty(ConfigVars.HBASE_TEST_COL_QUALIFIER_NAME_KEY);
+            Integer numRowsToPut = Integer.parseInt(props.getProperty(ConfigVars.HBASE_TEST_NUM_ROWS_TO_PUT_KEY));
 
-        LOG.info("HBASE: Creating table {} with column family {}", tableName, colFamName);
-        createHbaseTable(tableName, colFamName, configuration);
+            LOG.info("HBASE: Creating table {} with column family {}", tableName, colFamName);
+            createHbaseTable(hcon, tableName, colFamName, configuration);
 
-        LOG.info("HBASE: Populate the table with {} rows.", numRowsToPut);
-        for (int i = 0; i < numRowsToPut; i++) {
-            putRow(tableName, colFamName, String.valueOf(i), colQualiferName, "row_" + i, configuration);
+            LOG.info("HBASE: Populate the table with {} rows.", numRowsToPut);
+            for (int i = 0; i < numRowsToPut; i++) {
+                putRow(hcon, tableName, colFamName, String.valueOf(i), colQualiferName, "row_" + i, configuration);
+            }
+
+            LOG.info("HBASE: Fetching and comparing the results");
+            for (int i = 0; i < numRowsToPut; i++) {
+                Result result = getRow(hcon, tableName, colFamName, String.valueOf(i), colQualiferName, configuration);
+                assertNotNull(result);
+                assertEquals("row_" + i, new String(result.value()));
+            }
+
+            LOG.info("Test complete, dropping schema!");
+            hutil.dropAll();
         }
-
-        LOG.info("HBASE: Fetching and comparing the results");
-        for (int i = 0; i < numRowsToPut; i++) {
-            Result result = getRow(tableName, colFamName, String.valueOf(i), colQualiferName, configuration);
-            assertEquals("row_" + i, new String(result.value()));
-        }
-
-        LOG.info("Test complete, dropping schema!");
-        hutil.dropAll();
-        // shutdown client
-        hcon.close();
-
     }
 
+<<<<<<< 4dd8acfe7995aa8e913e4386aefff43b91bc8376
     private static void createHbaseTable(String tableName, String colFamily, Configuration configuration) throws Exception {
         Connection connection = ConnectionFactory.createConnection(configuration);
         final Admin admin = connection.getAdmin();
@@ -114,6 +129,34 @@ public class HBaseITCase {
         get.addColumn(Bytes.toBytes(colFamName), Bytes.toBytes(colQualifier));
         get.setMaxVersions(1);
         result = table.get(get);
+=======
+    private static void createHbaseTable(Connection connection, String tableName, String colFamily, Configuration configuration) throws Exception {
+        try (Admin admin = connection.getAdmin()) {
+            HTableDescriptor hTableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
+            HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(colFamily);
+            hTableDescriptor.addFamily(hColumnDescriptor);
+            admin.createTable(hTableDescriptor);
+        }
+    }
+
+    private static void putRow(Connection connection, String tableName, String colFamName, String rowKey, String colQualifier, String value, Configuration configuration) throws Exception {
+        try (Table table = connection.getTable(TableName.valueOf(tableName))) {
+            Put put = new Put(Bytes.toBytes(rowKey));
+            put.addColumn(Bytes.toBytes(colFamName), Bytes.toBytes(colQualifier), Bytes.toBytes(value));
+            table.put(put);
+        }
+    }
+
+    private static Result getRow(Connection connection, String tableName, String colFamName, String rowKey, String colQualifier, Configuration configuration) throws Exception {
+        Result result = null;
+        try (Table table = connection.getTable(TableName.valueOf(tableName))) {
+            // HTable table = new HTable(configuration, tableName);
+            Get get = new Get(Bytes.toBytes(rowKey));
+            get.addColumn(Bytes.toBytes(colFamName), Bytes.toBytes(colQualifier));
+            get.setMaxVersions(1);
+            result = table.get(get);
+        }
+>>>>>>> Converts to HBase 2 APIs
         return result;
     }
 

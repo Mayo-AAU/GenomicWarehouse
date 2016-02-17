@@ -14,24 +14,23 @@ import org.apache.hadoop.hbase.client.Connection;
  */
 public class HBaseUtil {
 
-    private HBaseConnector conn;
+    private Connection connection;
 
-    public HBaseUtil(HBaseConnector con) {
-        conn = con;
+    public HBaseUtil(Connection con) {
+        this.connection = con;
     }
 
     /**
      * drop all tables in the schema
      */
     public void dropAll() throws IOException {
-        Connection c = conn.getConnection();
-        Admin admin = c.getAdmin();
-        TableName[] t = admin.listTableNames();
-        for (TableName tn : t) {
-            admin.disableTable(tn);
-            admin.deleteTable(tn);
+        try (Admin admin = connection.getAdmin()) {
+            TableName[] t = admin.listTableNames();
+            for (TableName tn : t) {
+                admin.disableTable(tn);
+                admin.deleteTable(tn);
+            }
         }
-        admin.close();
     }
 
 }
