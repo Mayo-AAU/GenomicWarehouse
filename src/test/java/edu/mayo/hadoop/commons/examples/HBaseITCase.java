@@ -66,6 +66,26 @@ public class HBaseITCase {
     }
 
     @Test
+    public void running() throws Exception {
+        Configuration configuration = MiniClusterUtil.getHbaseLocalCluster().getHbaseConfiguration();
+        try {
+            HBaseAdmin.checkHBaseAvailable(configuration);
+        } catch (MasterNotRunningException mnre) {
+            fail("Master is not running: " + mnre.getMessage() + "\n");
+            throw mnre;
+        } catch (ZooKeeperConnectionException zkce) {
+            fail("ZooKeeper Connection exception: " + zkce.getMessage());
+            throw zkce;
+        } catch (ServiceException se) {
+            fail("Protobuf exception: " + se.getLocalizedMessage());
+            throw se;
+        } catch (IOException e) {
+            fail("IO exception: " + e.getLocalizedMessage());
+            throw e;
+        }
+    }
+
+    @Test
     public void testHbaseLocalCluster() throws Exception {
 
         LOG.info("Establishing a connection with HBase");
