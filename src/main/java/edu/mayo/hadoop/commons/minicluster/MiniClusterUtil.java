@@ -1,6 +1,7 @@
 package edu.mayo.hadoop.commons.minicluster;
 
 import com.github.sakserv.minicluster.config.ConfigVars;
+import com.github.sakserv.minicluster.impl.YarnLocalCluster;
 import com.github.sakserv.minicluster.impl.HbaseLocalCluster;
 import com.github.sakserv.minicluster.impl.HdfsLocalCluster;
 import com.github.sakserv.minicluster.impl.ZookeeperLocalCluster;
@@ -41,6 +42,7 @@ public class MiniClusterUtil {
      */
     public static void startAll(Properties prop) throws Exception {
         startZookeeper(prop);
+        startYarn(prop);
         startHBASE(prop);
     }
 
@@ -84,6 +86,26 @@ public class MiniClusterUtil {
                         props.getProperty(ConfigVars.HDFS_ENABLE_RUNNING_USER_AS_PROXY_USER)))
                 .setHdfsConfig(new Configuration())
                 .build();
+    }
+
+    public static YarnLocalCluster startYarn(Properties props){
+        YarnLocalCluster yarnLocalCluster = new YarnLocalCluster.Builder()
+                    .setNumNodeManagers(Integer.parseInt(props.getProperty(ConfigVars.YARN_NUM_NODE_MANAGERS_KEY)))
+                    .setNumLocalDirs(Integer.parseInt(props.getProperty(ConfigVars.YARN_NUM_LOCAL_DIRS_KEY)))
+                    .setNumLogDirs(Integer.parseInt(props.getProperty(ConfigVars.YARN_NUM_LOG_DIRS_KEY)))
+                    .setResourceManagerAddress(props.getProperty(ConfigVars.YARN_RESOURCE_MANAGER_ADDRESS_KEY))
+                    .setResourceManagerHostname(props.getProperty(ConfigVars.YARN_RESOURCE_MANAGER_HOSTNAME_KEY))
+                    .setResourceManagerSchedulerAddress(props.getProperty(
+                            ConfigVars.YARN_RESOURCE_MANAGER_SCHEDULER_ADDRESS_KEY))
+                    .setResourceManagerResourceTrackerAddress(props.getProperty(
+                            ConfigVars.YARN_RESOURCE_MANAGER_RESOURCE_TRACKER_ADDRESS_KEY))
+                    .setResourceManagerWebappAddress(props.getProperty(
+                            ConfigVars.YARN_RESOURCE_MANAGER_WEBAPP_ADDRESS_KEY))
+                    .setUseInJvmContainerExecutor(Boolean.parseBoolean(props.getProperty(
+                            ConfigVars.YARN_USE_IN_JVM_CONTAINER_EXECUTOR_KEY)))
+                    .setConfig(new Configuration())
+                    .build();
+        return yarnLocalCluster;
     }
 
 
