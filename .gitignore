@@ -4,3 +4,4 @@
 .settings
 embedded_hbase
 /build/
+.idea

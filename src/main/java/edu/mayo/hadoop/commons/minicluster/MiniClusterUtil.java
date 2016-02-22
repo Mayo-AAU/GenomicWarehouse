@@ -1,17 +1,16 @@
 package edu.mayo.hadoop.commons.minicluster;
 
+import com.github.sakserv.minicluster.config.ConfigVars;
+import com.github.sakserv.minicluster.impl.HbaseLocalCluster;
+import com.github.sakserv.minicluster.impl.HdfsLocalCluster;
+import com.github.sakserv.minicluster.impl.YarnLocalCluster;
+import com.github.sakserv.minicluster.impl.ZookeeperLocalCluster;
+import org.apache.hadoop.conf.Configuration;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
-import com.github.sakserv.minicluster.impl.YarnLocalCluster;
-import org.apache.hadoop.conf.Configuration;
-
-import com.github.sakserv.minicluster.config.ConfigVars;
-import com.github.sakserv.minicluster.impl.HbaseLocalCluster;
-import com.github.sakserv.minicluster.impl.HdfsLocalCluster;
-import com.github.sakserv.minicluster.impl.ZookeeperLocalCluster;
 
 /**
  * Created by m102417 on 2/11/16.
@@ -36,9 +35,9 @@ public class MiniClusterUtil {
     private static HdfsLocalCluster hdfsLocalCluster;
     private static HbaseLocalCluster hbaseLocalCluster;
 
-
     /**
      * starts all the services we need.
+     * 
      * @throws Exception
      */
     public static void startAll(Properties prop) throws Exception {
@@ -71,18 +70,11 @@ public class MiniClusterUtil {
         return zookeeperLocalCluster;
     }
 
-    public static void setUp(Properties props){
-        hdfsLocalCluster = new HdfsLocalCluster.Builder()
-                .setHdfsNamenodePort(Integer.parseInt(props.getProperty(ConfigVars.HDFS_NAMENODE_PORT_KEY)))
-                .setHdfsTempDir(props.getProperty(ConfigVars.HDFS_TEMP_DIR_KEY))
-                .setHdfsNumDatanodes(Integer.parseInt(props.getProperty(ConfigVars.HDFS_NUM_DATANODES_KEY)))
-                .setHdfsEnablePermissions(
-                        Boolean.parseBoolean(props.getProperty(ConfigVars.HDFS_ENABLE_PERMISSIONS_KEY)))
-                .setHdfsFormat(Boolean.parseBoolean(props.getProperty(ConfigVars.HDFS_FORMAT_KEY)))
-                .setHdfsEnableRunningUserAsProxyUser(Boolean.parseBoolean(
-                        props.getProperty(ConfigVars.HDFS_ENABLE_RUNNING_USER_AS_PROXY_USER)))
-                .setHdfsConfig(new Configuration())
-                .build();
+    public static void setUp(Properties props) {
+        hdfsLocalCluster = new HdfsLocalCluster.Builder().setHdfsNamenodePort(Integer.parseInt(props.getProperty(ConfigVars.HDFS_NAMENODE_PORT_KEY))).setHdfsTempDir(props.getProperty(ConfigVars.HDFS_TEMP_DIR_KEY))
+                .setHdfsNumDatanodes(Integer.parseInt(props.getProperty(ConfigVars.HDFS_NUM_DATANODES_KEY))).setHdfsEnablePermissions(Boolean.parseBoolean(props.getProperty(ConfigVars.HDFS_ENABLE_PERMISSIONS_KEY)))
+                .setHdfsFormat(Boolean.parseBoolean(props.getProperty(ConfigVars.HDFS_FORMAT_KEY))).setHdfsEnableRunningUserAsProxyUser(Boolean.parseBoolean(props.getProperty(ConfigVars.HDFS_ENABLE_RUNNING_USER_AS_PROXY_USER)))
+                .setHdfsConfig(new Configuration()).build();
     }
 
     public static YarnLocalCluster startYarn(Properties props) {
@@ -131,7 +123,6 @@ public class MiniClusterUtil {
         prop.load(input);
         return prop;
     }
-
     /**
      * stops all services that are running
      */
@@ -168,4 +159,5 @@ public class MiniClusterUtil {
     public static HbaseLocalCluster getHbaseLocalCluster() {
         return hbaseLocalCluster;
     }
+
 }
