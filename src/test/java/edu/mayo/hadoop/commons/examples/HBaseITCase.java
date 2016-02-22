@@ -13,9 +13,6 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.TableName;
-<<<<<<< 4dd8acfe7995aa8e913e4386aefff43b91bc8376
-import org.apache.hadoop.hbase.client.*;
-=======
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
@@ -25,7 +22,6 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
->>>>>>> Converts to HBase 2 APIs
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -121,35 +117,6 @@ public class HBaseITCase {
         }
     }
 
-<<<<<<< 4dd8acfe7995aa8e913e4386aefff43b91bc8376
-    private static void createHbaseTable(String tableName, String colFamily, Configuration configuration) throws Exception {
-        Connection connection = ConnectionFactory.createConnection(configuration);
-        final Admin admin = connection.getAdmin();
-        HTableDescriptor hTableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
-        HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(colFamily);
-
-        hTableDescriptor.addFamily(hColumnDescriptor);
-        admin.createTable(hTableDescriptor);
-    }
-
-    private static void putRow(String tableName, String colFamName, String rowKey, String colQualifier, String value, Configuration configuration) throws Exception {
-        Connection connection = ConnectionFactory.createConnection(configuration);
-        Table table = connection.getTable(TableName.valueOf(tableName));
-        Put put = new Put(Bytes.toBytes(rowKey));
-        put.addColumn(Bytes.toBytes(colFamName), Bytes.toBytes(colQualifier), Bytes.toBytes(value));
-        table.put(put);
-        table.close();
-    }
-
-    private static Result getRow(String tableName, String colFamName, String rowKey, String colQualifier, Configuration configuration) throws Exception {
-        Result result;
-        Connection connection = ConnectionFactory.createConnection(configuration);
-        Table table = connection.getTable(TableName.valueOf(tableName));
-        Get get = new Get(Bytes.toBytes(rowKey));
-        get.addColumn(Bytes.toBytes(colFamName), Bytes.toBytes(colQualifier));
-        get.setMaxVersions(1);
-        result = table.get(get);
-=======
     private static void createHbaseTable(Connection connection, String tableName, String colFamily, Configuration configuration) throws Exception {
         try (Admin admin = connection.getAdmin()) {
             HTableDescriptor hTableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
@@ -176,7 +143,6 @@ public class HBaseITCase {
             get.setMaxVersions(1);
             result = table.get(get);
         }
->>>>>>> Converts to HBase 2 APIs
         return result;
     }
 
