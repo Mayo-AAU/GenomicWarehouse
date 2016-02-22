@@ -1,10 +1,10 @@
 package edu.mayo.hadoop.commons.hbase;
 
+import java.io.IOException;
+
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
-
-import java.io.IOException;
 
 /**
  * Created by m102417 on 2/12/16.
@@ -14,10 +14,9 @@ import java.io.IOException;
  */
 public class HBaseUtil {
 
-
     private HBaseConnector conn;
 
-    public HBaseUtil(HBaseConnector con){
+    public HBaseUtil(HBaseConnector con) {
         conn = con;
     }
 
@@ -28,7 +27,7 @@ public class HBaseUtil {
         Connection c = conn.getConnection();
         Admin admin = c.getAdmin();
         TableName[] t = admin.listTableNames();
-        for(TableName tn : t){
+        for (TableName tn : t) {
             admin.disableTable(tn);
             admin.deleteTable(tn);
         }
