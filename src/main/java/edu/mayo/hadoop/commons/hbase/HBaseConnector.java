@@ -1,15 +1,15 @@
 package edu.mayo.hadoop.commons.hbase;
 
-import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 
+import java.io.IOException;
+
 /**
- * Created by m102417 on 1/26/16. Connects the code to HBase via the hbase
- * client.
+ * Connects the code to HBase via the hbase client.
+ * Created by m102417 on 1/26/16.
  */
 public class HBaseConnector {
 
@@ -34,7 +34,7 @@ public class HBaseConnector {
      * instead of using the classpath to find the hbase configuration files, use
      * this constructor to explicity set the configuration on hbase (for example
      * if you want to run local tests).
-     * 
+     *
      * @param c
      * @return
      */
@@ -46,7 +46,7 @@ public class HBaseConnector {
 
     /**
      * uses the HADOOP envoronment variables to infer the configuration.
-     * 
+     *
      * @return
      * @throws IOException
      */

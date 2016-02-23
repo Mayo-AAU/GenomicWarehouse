@@ -1,23 +1,7 @@
 package edu.mayo.hadoop.commons.examples;
 
-import edu.mayo.hadoop.commons.examples.BasicWordCount;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.LocalFileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.io.IntWritable;
@@ -29,6 +13,15 @@ import org.apache.hadoop.test.PathUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class BasicMRTestITCase {
 
@@ -79,7 +72,7 @@ public class BasicMRTestITCase {
         Path outDir = new Path(OUT_DIR);
 
         fs.delete(inDir, true);
-        fs.delete(outDir,true);
+        fs.delete(outDir, true);
 
         // create the input data files
         List<String> content = new ArrayList<String>();
@@ -87,7 +80,7 @@ public class BasicMRTestITCase {
         writeHDFSContent(fs, inDir, DATA_FILE, content);
 
         // set up the job, submit the job and wait for it complete
-        Job job =  Job.getInstance(conf, "mr test wordcount");
+        Job job = Job.getInstance(conf, "mr test wordcount");
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
         job.setMapperClass(BasicWordCount.TokenizerMapper.class);
@@ -104,14 +97,14 @@ public class BasicMRTestITCase {
 
         // clean up after test case
         fs.delete(inDir, true);
-        fs.delete(outDir,true);
+        fs.delete(outDir, true);
     }
 
 
     private void writeHDFSContent(FileSystem fs, Path dir, String fileName, List<String> content) throws IOException {
         Path newFilePath = new Path(dir, fileName);
         FSDataOutputStream out = fs.create(newFilePath);
-        for (String line : content){
+        for (String line : content) {
             out.writeBytes(line);
         }
         out.close();
@@ -122,12 +115,12 @@ public class BasicMRTestITCase {
         FileStatus[] fileStatus = fs.listStatus(outDir);
         for (FileStatus file : fileStatus) {
             String name = file.getPath().getName();
-            if (name.contains("part-r-00000")){
+            if (name.contains("part-r-00000")) {
                 Path filePath = new Path(outDir + "/" + name);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(filePath)));
-                for (int i=0; i < numLines; i++){
+                for (int i = 0; i < numLines; i++) {
                     String line = reader.readLine();
-                    if (line == null){
+                    if (line == null) {
                         fail("Results are not what was expected");
                     }
                     results.add(line);
