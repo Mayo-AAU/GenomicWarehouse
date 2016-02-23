@@ -14,12 +14,12 @@ import java.util.Properties;
 
 /**
  * Created by m102417 on 2/11/16.
- *
+ * <p>
  * Utility class for starting and stopping hadoop mini-clusters (these are
  * clusters that can run in the JVM on localhost)
- *
+ * <p>
  * This is used in integration tests on the hadoop stack
- *
+ * <p>
  * Note much of this is static because we don't want to be starting and stoping
  * multiple copies of these services because it is expensive!
  */
@@ -37,7 +37,7 @@ public class MiniClusterUtil {
 
     /**
      * starts all the services we need.
-     * 
+     *
      * @throws Exception
      */
     public static void startAll(Properties prop) throws Exception {
@@ -62,11 +62,16 @@ public class MiniClusterUtil {
     // return hdfsLocalCluster;
     // }
 
-    public static ZookeeperLocalCluster startZookeeper(Properties props) throws Exception {
-        zookeeperLocalCluster = new ZookeeperLocalCluster.Builder().setPort(Integer.parseInt(props.getProperty(ConfigVars.ZOOKEEPER_PORT_KEY))).setTempDir(props.getProperty(ConfigVars.ZOOKEEPER_TEMP_DIR_KEY))
-                .setZookeeperConnectionString(props.getProperty(ConfigVars.ZOOKEEPER_CONNECTION_STRING_KEY)).build();
-        zookeeperLocalCluster.start();
-        zookeeperStarted = true;
+    public static synchronized ZookeeperLocalCluster startZookeeper(Properties props) throws Exception {
+        if (!zookeeperStarted) {
+            ZookeeperLocalCluster.Builder builder = new ZookeeperLocalCluster.Builder();
+            builder.setPort(Integer.parseInt(props.getProperty(ConfigVars.ZOOKEEPER_PORT_KEY)));
+            builder.setTempDir(props.getProperty(ConfigVars.ZOOKEEPER_TEMP_DIR_KEY));
+            builder.setZookeeperConnectionString(props.getProperty(ConfigVars.ZOOKEEPER_CONNECTION_STRING_KEY));
+            zookeeperLocalCluster = builder.build();
+            zookeeperLocalCluster.start();
+            zookeeperStarted = true;
+        }
         return zookeeperLocalCluster;
     }
 
@@ -97,18 +102,17 @@ public class MiniClusterUtil {
         return yarnLocalCluster;
     }
 
-    public static HbaseLocalCluster startHBASE(Properties props) throws Exception {
-        if (!zookeeperStarted) {
-            startZookeeper(props);
+    public synchronized static HbaseLocalCluster startHBASE(Properties props) throws Exception {
+        startZookeeper(props);
+        if (!hbaseStarted) {
+            hbaseLocalCluster = new HbaseLocalCluster.Builder().setHbaseMasterPort(Integer.parseInt(props.getProperty(ConfigVars.HBASE_MASTER_PORT_KEY))).setHbaseMasterInfoPort(Integer.parseInt(props.getProperty(ConfigVars.HBASE_MASTER_INFO_PORT_KEY)))
+                    .setNumRegionServers(Integer.parseInt(props.getProperty(ConfigVars.HBASE_NUM_REGION_SERVERS_KEY))).setHbaseRootDir(props.getProperty(ConfigVars.HBASE_ROOT_DIR_KEY))
+                    .setZookeeperPort(Integer.parseInt(props.getProperty(ConfigVars.ZOOKEEPER_PORT_KEY))).setZookeeperConnectionString(props.getProperty(ConfigVars.ZOOKEEPER_CONNECTION_STRING_KEY))
+                    .setZookeeperZnodeParent(props.getProperty(ConfigVars.HBASE_ZNODE_PARENT_KEY)).setHbaseWalReplicationEnabled(Boolean.parseBoolean(props.getProperty(ConfigVars.HBASE_WAL_REPLICATION_ENABLED_KEY)))
+                    .setHbaseConfiguration(new Configuration()).build();
+            hbaseLocalCluster.start();
+            hbaseStarted = true;
         }
-
-        hbaseLocalCluster = new HbaseLocalCluster.Builder().setHbaseMasterPort(Integer.parseInt(props.getProperty(ConfigVars.HBASE_MASTER_PORT_KEY))).setHbaseMasterInfoPort(Integer.parseInt(props.getProperty(ConfigVars.HBASE_MASTER_INFO_PORT_KEY)))
-                .setNumRegionServers(Integer.parseInt(props.getProperty(ConfigVars.HBASE_NUM_REGION_SERVERS_KEY))).setHbaseRootDir(props.getProperty(ConfigVars.HBASE_ROOT_DIR_KEY))
-                .setZookeeperPort(Integer.parseInt(props.getProperty(ConfigVars.ZOOKEEPER_PORT_KEY))).setZookeeperConnectionString(props.getProperty(ConfigVars.ZOOKEEPER_CONNECTION_STRING_KEY))
-                .setZookeeperZnodeParent(props.getProperty(ConfigVars.HBASE_ZNODE_PARENT_KEY)).setHbaseWalReplicationEnabled(Boolean.parseBoolean(props.getProperty(ConfigVars.HBASE_WAL_REPLICATION_ENABLED_KEY)))
-                .setHbaseConfiguration(new Configuration()).build();
-        hbaseLocalCluster.start();
-        hbaseStarted = true;
         return hbaseLocalCluster;
     }
 
@@ -123,6 +127,7 @@ public class MiniClusterUtil {
         prop.load(input);
         return prop;
     }
+
     /**
      * stops all services that are running
      */
@@ -131,7 +136,7 @@ public class MiniClusterUtil {
         stopZookeeper();
     }
 
-    public static void stopZookeeper() throws Exception {
+    public static synchronized void stopZookeeper() throws Exception {
         if (zookeeperStarted) {
             zookeeperLocalCluster.stop();
             zookeeperStarted = false;
