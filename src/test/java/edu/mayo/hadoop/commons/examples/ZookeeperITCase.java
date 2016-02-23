@@ -2,6 +2,8 @@ package edu.mayo.hadoop.commons.examples;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.junit.After;
@@ -23,7 +25,9 @@ public class ZookeeperITCase {
 
     @Before
     public void setup() throws Exception {
-        prop = MiniClusterUtil.loadPropertiesFile("target/test-classes/zookeeper.properties");
+        try (InputStream stream = HBaseITCase.class.getResourceAsStream("/zookeeper.properties")) {
+            prop = MiniClusterUtil.loadPropertiesStream(stream);
+        }
         MiniClusterUtil.startZookeeper(prop);
     }
 
