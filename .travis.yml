@@ -4,3 +4,8 @@ language: java
 jdk:
   - oraclejdk8
 
+# Bulid using maven
+install: mvn install -DskipTests=true
+script: mvn test
+
+
