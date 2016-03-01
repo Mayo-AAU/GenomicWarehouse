@@ -1,7 +1,22 @@
 package edu.mayo.hadoop.commons.examples;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.io.IntWritable;
@@ -14,15 +29,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.*;
-
 public class BasicMRTestITCase {
 
     private static final String CLUSTER_1 = "cluster1";
@@ -34,8 +40,7 @@ public class BasicMRTestITCase {
 
     @Before
     public void setUp() throws Exception {
-        testDataPath = new File(PathUtils.getTestDir(getClass()),
-                "miniclusters");
+        testDataPath = new File(PathUtils.getTestDir(getClass()), "miniclusters");
 
         System.clearProperty(MiniDFSCluster.PROP_TEST_BUILD_DATA);
         conf = new HdfsConfiguration();
@@ -50,8 +55,7 @@ public class BasicMRTestITCase {
 
     @After
     public void tearDown() throws Exception {
-        Path dataDir = new Path(
-                testDataPath.getParentFile().getParentFile().getParent());
+        Path dataDir = new Path(testDataPath.getParentFile().getParentFile().getParent());
         fs.delete(dataDir, true);
         File rootTestFile = new File(testDataPath.getParentFile().getParentFile().getParent());
         String rootTestDir = rootTestFile.getAbsolutePath();
@@ -99,7 +103,6 @@ public class BasicMRTestITCase {
         fs.delete(inDir, true);
         fs.delete(outDir, true);
     }
-
 
     private void writeHDFSContent(FileSystem fs, Path dir, String fileName, List<String> content) throws IOException {
         Path newFilePath = new Path(dir, fileName);
