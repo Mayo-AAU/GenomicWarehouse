@@ -6,3 +6,4 @@ embedded_hbase
 /build/
 .idea
 .gradle
+/bin/
