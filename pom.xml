@@ -97,11 +97,6 @@
             <artifactId>hbase-server</artifactId>
             <version>${hbase.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase-server</artifactId>
-            <version>${hbase.version}</version>
-        </dependency>
 
         <!-- Spark -->
         <dependency>
@@ -150,19 +145,6 @@
             <artifactId>hadoop-mini-clusters-yarn</artifactId>
             <version>0.1.3</version>
         </dependency>
-        <!-- Hadoop Mini Clusters Common -->
-        <dependency>
-            <groupId>com.github.sakserv</groupId>
-            <artifactId>hadoop-mini-clusters-common</artifactId>
-            <version>0.1.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.sakserv</groupId>
-            <artifactId>hadoop-mini-clusters</artifactId>
-            <version>0.1.3</version>
-            <type>pom</type>
-        </dependency>
-
 
     </dependencies>
     <build>
