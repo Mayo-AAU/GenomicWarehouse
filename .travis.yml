@@ -6,6 +6,6 @@ jdk:
 
 # Bulid using maven
 install: mvn install -DskipTests=true
-script: mvn test
+script: mvn test failsafe:integration-test
 
 
