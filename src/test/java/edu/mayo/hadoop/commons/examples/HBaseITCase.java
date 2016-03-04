@@ -5,8 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -24,14 +22,13 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.sakserv.minicluster.config.ConfigVars;
 import com.google.protobuf.ServiceException;
 
+import edu.mayo.hadoop.commons.hbase.AutoConfigure;
 import edu.mayo.hadoop.commons.hbase.HBaseUtil;
 import edu.mayo.hadoop.commons.minicluster.MiniClusterUtil;
 
@@ -39,22 +36,6 @@ public class HBaseITCase {
 
     // Logger
     private static final Logger LOG = LoggerFactory.getLogger(HBaseITCase.class);
-    // properties file
-    public static final String HBASE_PROPS = "/hbase.properties";
-    private static Properties props;
-
-    static {
-        try (InputStream stream = HBaseITCase.class.getResourceAsStream(HBASE_PROPS)) {
-            props = MiniClusterUtil.loadPropertiesStream(stream);
-        } catch (IOException e) {
-            LOG.error("Unable to load property file: {}", HBASE_PROPS);
-        }
-    }
-
-    @BeforeClass
-    public static void setUp() throws Exception {
-        MiniClusterUtil.startHBASE(props);
-    }
 
     @AfterClass
     public static void tearDown() throws Exception {
@@ -63,7 +44,7 @@ public class HBaseITCase {
 
     @Test
     public void running() throws Exception {
-        Configuration configuration = MiniClusterUtil.getHbaseLocalCluster().getHbaseConfiguration();
+        Configuration configuration = AutoConfigure.getConfiguration();
         try {
             HBaseAdmin.checkHBaseAvailable(configuration);
         } catch (MasterNotRunningException mnre) {
@@ -85,17 +66,17 @@ public class HBaseITCase {
     public void testHbaseLocalCluster() throws Exception {
 
         LOG.info("Establishing a connection with HBase");
-        Configuration configuration = MiniClusterUtil.getHbaseLocalCluster().getHbaseConfiguration();
+        Configuration configuration = AutoConfigure.getConfiguration();
         try (Connection hcon = ConnectionFactory.createConnection(configuration)) {
             HBaseUtil hutil = new HBaseUtil(hcon);
 
             LOG.info("Drop Tables in case things did not cleanup correctly in the past");
             hutil.dropAll();
 
-            String tableName = props.getProperty(ConfigVars.HBASE_TEST_TABLE_NAME_KEY);
-            String colFamName = props.getProperty(ConfigVars.HBASE_TEST_COL_FAMILY_NAME_KEY);
-            String colQualiferName = props.getProperty(ConfigVars.HBASE_TEST_COL_QUALIFIER_NAME_KEY);
-            Integer numRowsToPut = Integer.parseInt(props.getProperty(ConfigVars.HBASE_TEST_NUM_ROWS_TO_PUT_KEY));
+            String tableName = "hbase_test_table";
+            String colFamName = "cf1";
+            String colQualiferName = "ca1";
+            Integer numRowsToPut = 50;
 
             LOG.info("HBASE: Creating table {} with column family {}", tableName, colFamName);
             createHbaseTable(hcon, tableName, colFamName, configuration);
