@@ -26,6 +26,13 @@ To include the (longer) integration tests:
 mvn failsafe:integration-test
 ```
 
+Getting Maven to [fetch source and javadoc](http://tedwise.com/2010/01/27/maven-micro-tip-get-sources-and-javadocs/) is easy:
+
+```bash
+mvn dependency:sources
+mvn dependency:resolve -Dclassifier=javadoc
+```
+
 ### Dependancies
 
 To add a dependency, edit the `pom.xml` file, looking for the `<dependancies>` section, *e.g.*
