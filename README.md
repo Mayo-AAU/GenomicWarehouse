@@ -52,7 +52,7 @@ Should be mostly self-explanatory.
 To [build an `assembly`](http://maven.apache.org/plugins/maven-assembly-plugin/), use the `assembly:single` goal:
 
 ```bash
-mvn deploy assembly:single
+mvn package assembly:single
 ```
 
 This will build `target/hadoop-commons-1.0-SNAPSHOT-jar-with-dependencies.jar`.  It is **critical** that the command line be used as is!  `assembly:single` alone will [not build the correct executable jar](http://stackoverflow.com/a/574650/334619)!
