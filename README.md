@@ -47,6 +47,16 @@ To add a dependency, edit the `pom.xml` file, looking for the `<dependancies>` s
 
 Should be mostly self-explanatory.
 
+## Deployment
+
+To [build an `assembly`](http://maven.apache.org/plugins/maven-assembly-plugin/), use the `assembly:single` goal:
+
+```bash
+mvn assembly:single
+```
+
+This will build `target/hadoop-commons-1.0-SNAPSHOT-jar-with-dependencies.jar`.
+
 # Development
 
 HadoopCommons uses [Hadoop mini-clusters](http://www.lopakalogic.com/articles/hadoop-articles/hadoop-testing-with-minicluster/) for local testing / debugging (see [https://github.com/sakserv/hadoop-mini-clusters](https://github.com/sakserv/hadoop-mini-clusters) for details).  At runtime, the `AutoConfigure` class provides a static method `getConfiguration()` to return a Hadoop configuration.  This configuration is either:
