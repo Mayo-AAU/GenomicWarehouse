@@ -26,6 +26,13 @@ To include the (longer) integration tests:
 mvn failsafe:integration-test
 ```
 
+Getting Maven to [fetch source and javadoc](http://tedwise.com/2010/01/27/maven-micro-tip-get-sources-and-javadocs/) is easy:
+
+```bash
+mvn dependency:sources
+mvn dependency:resolve -Dclassifier=javadoc
+```
+
 ### Dependancies
 
 To add a dependency, edit the `pom.xml` file, looking for the `<dependancies>` section, *e.g.*
@@ -39,6 +46,16 @@ To add a dependency, edit the `pom.xml` file, looking for the `<dependancies>` s
 ```
 
 Should be mostly self-explanatory.
+
+## Deployment
+
+To [build an `assembly`](http://maven.apache.org/plugins/maven-assembly-plugin/), use the `assembly:single` goal:
+
+```bash
+mvn package assembly:single
+```
+
+This will build `target/hadoop-commons-1.0-SNAPSHOT-jar-with-dependencies.jar`.  It is **critical** that the command line be used as is!  `assembly:single` alone will [not build the correct executable jar](http://stackoverflow.com/a/574650/334619)!
 
 # Development
 

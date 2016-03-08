@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.sakserv.minicluster.config.ConfigVars;
 import com.github.sakserv.minicluster.impl.HbaseLocalCluster;
@@ -25,6 +27,7 @@ import com.github.sakserv.minicluster.impl.ZookeeperLocalCluster;
  * multiple copies of these services because it is expensive!
  */
 public class MiniClusterUtil {
+    private static final Logger LOG = LoggerFactory.getLogger(MiniClusterUtil.class);
 
     // variables to track what services are currently started in the jvm env.
     private static boolean zookeeperStarted = false;
@@ -101,6 +104,13 @@ public class MiniClusterUtil {
                     .setHbaseRootDir(props.getProperty(ConfigVars.HBASE_ROOT_DIR_KEY)).setZookeeperPort(Integer.parseInt(props.getProperty(ConfigVars.ZOOKEEPER_PORT_KEY)))
                     .setZookeeperConnectionString(props.getProperty(ConfigVars.ZOOKEEPER_CONNECTION_STRING_KEY)).setZookeeperZnodeParent(props.getProperty(ConfigVars.HBASE_ZNODE_PARENT_KEY))
                     .setHbaseWalReplicationEnabled(Boolean.parseBoolean(props.getProperty(ConfigVars.HBASE_WAL_REPLICATION_ENABLED_KEY))).setHbaseConfiguration(new Configuration()).build();
+            hbaseLocalCluster.getHbaseConfiguration().set("hbase.master.hostname", props.getProperty("hbase.master.hostname"));
+
+            // Set all our properties
+            for (Object key : props.keySet()) {
+                LOG.info("Setting " + key.toString() + ": " + props.getProperty(key.toString()));
+                hbaseLocalCluster.getHbaseConfiguration().set(key.toString(), props.getProperty(key.toString()));
+            }
             hbaseLocalCluster.start();
             hbaseStarted = true;
         }

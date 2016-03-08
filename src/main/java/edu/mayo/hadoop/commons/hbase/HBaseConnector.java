@@ -1,15 +1,15 @@
 package edu.mayo.hadoop.commons.hbase;
 
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 
-import java.io.IOException;
-
 /**
- * Connects the code to HBase via the hbase client.
- * Created by m102417 on 1/26/16.
+ * Connects the code to HBase via the hbase client. Created by m102417 on
+ * 1/26/16.
  */
 public class HBaseConnector {
 
