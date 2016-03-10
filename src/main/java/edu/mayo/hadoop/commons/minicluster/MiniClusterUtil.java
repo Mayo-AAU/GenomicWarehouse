@@ -1,19 +1,18 @@
 package edu.mayo.hadoop.commons.minicluster;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
-import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.sakserv.minicluster.config.ConfigVars;
 import com.github.sakserv.minicluster.impl.HbaseLocalCluster;
 import com.github.sakserv.minicluster.impl.HdfsLocalCluster;
 import com.github.sakserv.minicluster.impl.YarnLocalCluster;
 import com.github.sakserv.minicluster.impl.ZookeeperLocalCluster;
+import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * Created by m102417 on 2/11/16.
@@ -27,7 +26,6 @@ import com.github.sakserv.minicluster.impl.ZookeeperLocalCluster;
  * multiple copies of these services because it is expensive!
  */
 public class MiniClusterUtil {
-    private static final Logger LOG = LoggerFactory.getLogger(MiniClusterUtil.class);
 
     // variables to track what services are currently started in the jvm env.
     private static boolean zookeeperStarted = false;
@@ -87,30 +85,33 @@ public class MiniClusterUtil {
     }
 
     public static YarnLocalCluster startYarn(Properties props) {
-        YarnLocalCluster yarnLocalCluster = new YarnLocalCluster.Builder().setNumNodeManagers(Integer.parseInt(props.getProperty(ConfigVars.YARN_NUM_NODE_MANAGERS_KEY)))
-                .setNumLocalDirs(Integer.parseInt(props.getProperty(ConfigVars.YARN_NUM_LOCAL_DIRS_KEY))).setNumLogDirs(Integer.parseInt(props.getProperty(ConfigVars.YARN_NUM_LOG_DIRS_KEY)))
-                .setResourceManagerAddress(props.getProperty(ConfigVars.YARN_RESOURCE_MANAGER_ADDRESS_KEY)).setResourceManagerHostname(props.getProperty(ConfigVars.YARN_RESOURCE_MANAGER_HOSTNAME_KEY))
-                .setResourceManagerSchedulerAddress(props.getProperty(ConfigVars.YARN_RESOURCE_MANAGER_SCHEDULER_ADDRESS_KEY)).setResourceManagerResourceTrackerAddress(props.getProperty(ConfigVars.YARN_RESOURCE_MANAGER_RESOURCE_TRACKER_ADDRESS_KEY))
-                .setResourceManagerWebappAddress(props.getProperty(ConfigVars.YARN_RESOURCE_MANAGER_WEBAPP_ADDRESS_KEY)).setUseInJvmContainerExecutor(Boolean.parseBoolean(props.getProperty(ConfigVars.YARN_USE_IN_JVM_CONTAINER_EXECUTOR_KEY)))
-                .setConfig(new Configuration()).build();
+        YarnLocalCluster yarnLocalCluster = new YarnLocalCluster.Builder()
+                .setNumNodeManagers(Integer.parseInt(props.getProperty(ConfigVars.YARN_NUM_NODE_MANAGERS_KEY)))
+                .setNumLocalDirs(Integer.parseInt(props.getProperty(ConfigVars.YARN_NUM_LOCAL_DIRS_KEY)))
+                .setNumLogDirs(Integer.parseInt(props.getProperty(ConfigVars.YARN_NUM_LOG_DIRS_KEY)))
+                .setResourceManagerAddress(props.getProperty(ConfigVars.YARN_RESOURCE_MANAGER_ADDRESS_KEY))
+                .setResourceManagerHostname(props.getProperty(ConfigVars.YARN_RESOURCE_MANAGER_HOSTNAME_KEY))
+                .setResourceManagerSchedulerAddress(props.getProperty(
+                        ConfigVars.YARN_RESOURCE_MANAGER_SCHEDULER_ADDRESS_KEY))
+                .setResourceManagerResourceTrackerAddress(props.getProperty(
+                        ConfigVars.YARN_RESOURCE_MANAGER_RESOURCE_TRACKER_ADDRESS_KEY))
+                .setResourceManagerWebappAddress(props.getProperty(
+                        ConfigVars.YARN_RESOURCE_MANAGER_WEBAPP_ADDRESS_KEY))
+                .setUseInJvmContainerExecutor(Boolean.parseBoolean(props.getProperty(
+                        ConfigVars.YARN_USE_IN_JVM_CONTAINER_EXECUTOR_KEY)))
+                .setConfig(new Configuration())
+                .build();
         return yarnLocalCluster;
     }
 
     public synchronized static HbaseLocalCluster startHBASE(Properties props) throws Exception {
         startZookeeper(props);
         if (!hbaseStarted) {
-            hbaseLocalCluster = new HbaseLocalCluster.Builder().setHbaseMasterPort(Integer.parseInt(props.getProperty(ConfigVars.HBASE_MASTER_PORT_KEY)))
-                    .setHbaseMasterInfoPort(Integer.parseInt(props.getProperty(ConfigVars.HBASE_MASTER_INFO_PORT_KEY))).setNumRegionServers(Integer.parseInt(props.getProperty(ConfigVars.HBASE_NUM_REGION_SERVERS_KEY)))
-                    .setHbaseRootDir(props.getProperty(ConfigVars.HBASE_ROOT_DIR_KEY)).setZookeeperPort(Integer.parseInt(props.getProperty(ConfigVars.ZOOKEEPER_PORT_KEY)))
-                    .setZookeeperConnectionString(props.getProperty(ConfigVars.ZOOKEEPER_CONNECTION_STRING_KEY)).setZookeeperZnodeParent(props.getProperty(ConfigVars.HBASE_ZNODE_PARENT_KEY))
-                    .setHbaseWalReplicationEnabled(Boolean.parseBoolean(props.getProperty(ConfigVars.HBASE_WAL_REPLICATION_ENABLED_KEY))).setHbaseConfiguration(new Configuration()).build();
-            hbaseLocalCluster.getHbaseConfiguration().set("hbase.master.hostname", props.getProperty("hbase.master.hostname"));
-
-            // Set all our properties
-            for (Object key : props.keySet()) {
-                LOG.info("Setting " + key.toString() + ": " + props.getProperty(key.toString()));
-                hbaseLocalCluster.getHbaseConfiguration().set(key.toString(), props.getProperty(key.toString()));
-            }
+            hbaseLocalCluster = new HbaseLocalCluster.Builder().setHbaseMasterPort(Integer.parseInt(props.getProperty(ConfigVars.HBASE_MASTER_PORT_KEY))).setHbaseMasterInfoPort(Integer.parseInt(props.getProperty(ConfigVars.HBASE_MASTER_INFO_PORT_KEY)))
+                    .setNumRegionServers(Integer.parseInt(props.getProperty(ConfigVars.HBASE_NUM_REGION_SERVERS_KEY))).setHbaseRootDir(props.getProperty(ConfigVars.HBASE_ROOT_DIR_KEY))
+                    .setZookeeperPort(Integer.parseInt(props.getProperty(ConfigVars.ZOOKEEPER_PORT_KEY))).setZookeeperConnectionString(props.getProperty(ConfigVars.ZOOKEEPER_CONNECTION_STRING_KEY))
+                    .setZookeeperZnodeParent(props.getProperty(ConfigVars.HBASE_ZNODE_PARENT_KEY)).setHbaseWalReplicationEnabled(Boolean.parseBoolean(props.getProperty(ConfigVars.HBASE_WAL_REPLICATION_ENABLED_KEY)))
+                    .setHbaseConfiguration(new Configuration()).build();
             hbaseLocalCluster.start();
             hbaseStarted = true;
         }
@@ -144,14 +145,14 @@ public class MiniClusterUtil {
         }
     }
 
-    public static synchronized void stopHDFS() throws Exception {
+    public static void stopHDFS() throws Exception {
         if (hdfsStarted) {
             hdfsLocalCluster.stop();
             hdfsStarted = false;
         }
     }
 
-    public static synchronized void stopHBASE() throws Exception {
+    public static void stopHBASE() throws Exception {
         if (hbaseStarted) {
             hbaseLocalCluster.stop();
             hbaseStarted = false;
@@ -164,6 +165,40 @@ public class MiniClusterUtil {
 
     public static HbaseLocalCluster getHbaseLocalCluster() {
         return hbaseLocalCluster;
+    }
+
+    /**
+     * gets the local directory where hbase is keeping it's files
+     */
+    public static String getHBaseDir(Properties props){
+        String hbaseRoot = props.getProperty(ConfigVars.HBASE_ROOT_DIR_KEY);
+        return hbaseRoot;
+    }
+
+    /**
+     * used for deleting unstable/corrupted hbase files from a bad server shutdown
+     * @param props
+     * @throws IOException
+     */
+    public static void deleteLocalHBaseDir(Properties props) throws IOException {
+        FileUtils.deleteDirectory(new File(getHBaseDir(props)));
+    }
+
+    /**
+     * gets the local directory where zookeeper is keeping it's files
+     */
+    public static String getZookeeperDir(Properties props){
+        String hbaseRoot = props.getProperty(ConfigVars.ZOOKEEPER_TEMP_DIR_KEY);
+        return hbaseRoot;
+    }
+
+    /**
+     * used for deleting unstable/corrupted hbase files from a bad server shutdown
+     * @param props
+     * @throws IOException
+     */
+    public static void deleteLocalZookeeperDir(Properties props) throws IOException {
+        FileUtils.deleteDirectory(new File(getZookeeperDir(props)));
     }
 
 }

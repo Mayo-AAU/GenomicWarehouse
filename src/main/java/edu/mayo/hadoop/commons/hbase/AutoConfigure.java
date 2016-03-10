@@ -49,6 +49,11 @@ public class AutoConfigure {
             }
         }
 
+        //cleanup directories from runs that where unstable.
+        MiniClusterUtil.deleteLocalHBaseDir(props);
+        MiniClusterUtil.deleteLocalZookeeperDir(props);
+
+
         MiniClusterUtil.startHBASE(props);
         return MiniClusterUtil.getHbaseLocalCluster().getHbaseConfiguration();
     }
