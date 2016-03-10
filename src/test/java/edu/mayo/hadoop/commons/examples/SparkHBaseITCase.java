@@ -5,11 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import edu.mayo.hadoop.commons.hbase.AutoConfigure;
-import edu.mayo.hadoop.commons.hbase.HBaseConnector;
-import edu.mayo.hadoop.commons.hbase.HBaseUtil;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.Connection;
@@ -25,14 +21,16 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
-
 import org.junit.After;
 import org.junit.Before;
-import scala.Tuple2;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import edu.mayo.hadoop.commons.hbase.AutoConfigure;
+import edu.mayo.hadoop.commons.hbase.HBaseConnector;
+import edu.mayo.hadoop.commons.hbase.HBaseUtil;
+import scala.Tuple2;
 
 /**
  * Created by m102417 on 2/15/16.
@@ -58,11 +56,14 @@ public class SparkHBaseITCase {
     @Before
     public void setup() throws Exception {
         // make a connection on localhost to spark
-        //TODO: this needs to use the spark cluster and spark submit if we are on the cluster.
+        // TODO: this needs to use the spark cluster and spark submit if we are
+        // on the cluster.
         sconf = new SparkConf().setMaster("local").setAppName("Spark-Hbase Connector");
+        conf.set("spark.driver.host", "127.0.0.1");
+
         sc = new JavaSparkContext(sconf);
 
-        //get a connection to hbase
+        // get a connection to hbase
         configuration = AutoConfigure.getConfiguration();
         hbaseContext = new JavaHBaseContext(sc, configuration);
         hconnect = new HBaseConnector(configuration);
@@ -71,7 +72,8 @@ public class SparkHBaseITCase {
 
     @After
     public void shutdown() throws IOException {
-        //sc.stop(); //should this be done here or in the finally clause of each method?
+        // sc.stop(); //should this be done here or in the finally clause of
+        // each method?
         hconnect.getConnection().close();
     }
 
@@ -86,10 +88,7 @@ public class SparkHBaseITCase {
 
     }
 
-
-
-
-    //private JavaHBaseMapGetPutExample() {}
+    // private JavaHBaseMapGetPutExample() {}
 
     @Test
     public void getPutTest() {
@@ -103,30 +102,29 @@ public class SparkHBaseITCase {
             list.add(Bytes.toBytes("5"));
 
             JavaRDD<byte[]> rdd = sc.parallelize(list);
-            //Configuration conf = HBaseConfiguration.create();
+            // Configuration conf = HBaseConfiguration.create();
 
             JavaHBaseContext hbaseContext = new JavaHBaseContext(sc, configuration);
 
-            hbaseContext.foreachPartition(rdd,
-                    new VoidFunction<Tuple2<Iterator<byte[]>, Connection>>() {
-                        public void call(Tuple2<Iterator<byte[]>, Connection> t)
-                                throws Exception {
-                            Table table = t._2().getTable(TableName.valueOf(tableName));
-                            BufferedMutator mutator = t._2().getBufferedMutator(TableName.valueOf(tableName));
+            hbaseContext.foreachPartition(rdd, new VoidFunction<Tuple2<Iterator<byte[]>, Connection>>() {
+                @Override
+                public void call(Tuple2<Iterator<byte[]>, Connection> t) throws Exception {
+                    Table table = t._2().getTable(TableName.valueOf(tableName));
+                    BufferedMutator mutator = t._2().getBufferedMutator(TableName.valueOf(tableName));
 
-                            while (t._1().hasNext()) {
-                                byte[] b = t._1().next();
-                                Result r = table.get(new Get(b));
-                                if (r.getExists()) {
-                                    mutator.mutate(new Put(b));
-                                }
-                            }
-
-                            mutator.flush();
-                            mutator.close();
-                            table.close();
+                    while (t._1().hasNext()) {
+                        byte[] b = t._1().next();
+                        Result r = table.get(new Get(b));
+                        if (r.getExists()) {
+                            mutator.mutate(new Put(b));
                         }
-                    });
+                    }
+
+                    mutator.flush();
+                    mutator.close();
+                    table.close();
+                }
+            });
         } finally {
             sc.stop();
         }
@@ -134,12 +132,10 @@ public class SparkHBaseITCase {
 
     public static class GetFunction implements Function<byte[], Get> {
         private static final long serialVersionUID = 1L;
+        @Override
         public Get call(byte[] v) throws Exception {
             return new Get(v);
         }
     }
-
-
-
 
 }
