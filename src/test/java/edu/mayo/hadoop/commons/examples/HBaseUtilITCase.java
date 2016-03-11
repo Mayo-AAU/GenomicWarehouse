@@ -12,9 +12,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by m102417 on 3/10/16.
@@ -69,9 +71,11 @@ public class HBaseUtilITCase {
 
 
     //load some data in for testing...
-    private void load() throws Exception {
-        hutil.put(tableName,"key1", columnFamily[0], "field1", "value1");
-        hutil.put(tableName,"key1", columnFamily[1], "field2", "value2");
+    public void load() throws Exception {
+
+        //put data in using our restricted json spec...
+        hutil.putJSON(tableName, "key1", "{\"cf1\": {\"field1\":\"value1\", \"field2\":123, \"field3\":1.23, }, \"cf2\": {\"field4\":\"value1\"} }");
+        //put data in using a more direct method
         hutil.put(tableName,"key2", columnFamily[0], "field2", "value2");
 
     }
@@ -87,13 +91,28 @@ public class HBaseUtilITCase {
         //Create
         load();
 
-
         //Retrieve
-        //byte[] b = hutil.get(tableName, columnFamily[0], qualifier, key);
-        //System.err.println(Bytes.toString(b));
+        byte[] b = hutil.get(tableName, "key2",columnFamily[0],"field2");
+        assertEquals("value2",Bytes.toString(b));
 
-        //Update
+        //Update (just use put)
+        hutil.put(tableName, "key2", columnFamily[0], "field2", "X");
+        hutil.put(tableName, "key1", columnFamily[0], "field3", "Y");
+        b = hutil.get(tableName, "key2",columnFamily[0],"field2");
+        assertEquals("X",Bytes.toString(b));
+        List<String> pretty = hutil.format(hutil.scan(tableName,columnFamily[0], 1000));
+        for(String line : pretty){
+            System.err.println(line);
+        }
+        assertTrue(pretty.contains("        Key : field2, Value : X, NumericalValue : X"));
+        assertTrue(pretty.contains("        Key : field3, Value : Y, NumericalValue : Y"));
+
         //Delete
+        hutil.deleteRow(tableName,"key2");
+        b = hutil.get(tableName, "key2",columnFamily[0],"field2");
+        assertTrue(b == null);
+        //todo: perhaps we want to build more fine grain delete control when we have the use cases...
+        //e.g. http://www.tutorialspoint.com/hbase/hbase_delete_data.htm
 
 
         hutil.dropAll();
@@ -102,13 +121,26 @@ public class HBaseUtilITCase {
 
     @Test
     public void testScan() throws Exception {
+        ArrayList<String> expected = new ArrayList<String>();//note, we don't care about whitespace!
+        expected.add("key1");
+        expected.add("cf1");
+        expected.add("Key : field1, Value : value1");
+        expected.add("NumericalValue : 123");
+        expected.add("NumericalValue : 1.23");
+        expected.add("key2");
+        expected.add("cf1");
+        expected.add("Key : field2, Value : value2,");
+
         hutil.dropAll();
         hutil.createTable(tableName,columnFamily);
         load();
         Result[] results = hutil.scan(tableName,columnFamily[0], 1000);
         List<String> pretty = hutil.format(results);
+        int i = 0;
         for(String line : pretty){
-            System.err.println(line);
+            System.out.println(line);
+            assertTrue(line.contains(expected.get(i)));
+            i++;
         }
         hutil.dropAll();
     }
