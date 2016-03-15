@@ -1,6 +1,7 @@
 package edu.mayo.hadoop.commons.examples;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -9,6 +10,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -21,14 +23,13 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mayo.hadoop.commons.hbase.AutoConfigure;
-import edu.mayo.hadoop.commons.hbase.HBaseConnector;
 import edu.mayo.hadoop.commons.hbase.HBaseUtil;
 import scala.Tuple2;
 
@@ -40,41 +41,46 @@ import scala.Tuple2;
  *
  *
  */
-public class SparkHBaseITCase {
+public class SparkHBaseITCase implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     // Logger
     private static final Logger LOG = LoggerFactory.getLogger(SparkHBaseITCase.class);
 
-    private String tableName = "SparkHBaseTable";
-    private SparkConf sconf;
-    private JavaSparkContext sc;
-    private Configuration configuration;
-    private JavaHBaseContext hbaseContext;
-    private HBaseConnector hconnect;
-    private HBaseUtil hutil;
+    private static final String tableName = "SparkHBaseTable";
+    private static final String[] columnFamily = {"cf1", "cf2"};
+    private static SparkConf sconf;
+    private static JavaSparkContext sc;
+    private static Configuration configuration;
+    private static JavaHBaseContext hbaseContext;
+    private static Connection hconnect;
+    private static HBaseUtil hutil;
 
-    @Before
-    public void setup() throws Exception {
+    @BeforeClass
+    public static void setup() throws Exception {
         // make a connection on localhost to spark
         // TODO: this needs to use the spark cluster and spark submit if we are
         // on the cluster.
         sconf = new SparkConf().setMaster("local").setAppName("Spark-Hbase Connector");
-        conf.set("spark.driver.host", "127.0.0.1");
+        sconf.set("spark.driver.host", "127.0.0.1");
 
         sc = new JavaSparkContext(sconf);
 
         // get a connection to hbase
         configuration = AutoConfigure.getConfiguration();
         hbaseContext = new JavaHBaseContext(sc, configuration);
-        hconnect = new HBaseConnector(configuration);
-        hutil = new HBaseUtil(hconnect.connect());
+        hconnect = ConnectionFactory.createConnection(configuration);
+        hutil = new HBaseUtil(hconnect);
+        hutil.createTable(tableName, new String[]{"cf1"});
+
     }
 
-    @After
-    public void shutdown() throws IOException {
+    @AfterClass
+    public static void shutdown() throws IOException {
         // sc.stop(); //should this be done here or in the finally clause of
         // each method?
-        hconnect.getConnection().close();
+        hconnect.close();
     }
 
     @Test
@@ -91,8 +97,55 @@ public class SparkHBaseITCase {
     // private JavaHBaseMapGetPutExample() {}
 
     @Test
-    public void getPutTest() {
+    public void testBulkPut() throws IOException {
 
+
+        try {
+            List<String> list = new ArrayList<>();
+            list.add("1," + columnFamily[0] + ",a,1");
+            list.add("2," + columnFamily[0] + ",a,2");
+            list.add("3," + columnFamily[0] + ",a,3");
+            list.add("4," + columnFamily[0] + ",a,4");
+            list.add("5," + columnFamily[0] + ",a,5");
+
+            JavaRDD<String> rdd = sc.parallelize(list);
+
+            //Configuration conf = HBaseConfiguration.create();
+
+            JavaHBaseContext hbaseContext = new JavaHBaseContext(sc, configuration);
+
+            hbaseContext.bulkPut(rdd,
+                    TableName.valueOf(tableName),
+                    new PutFunction());
+        } finally {
+            //not sure I should stop this thing here!
+            sc.stop();
+        }
+
+        //go look at what the heck is in the table
+        System.err.println("*************************************************");
+        Result[] r = hutil.first(tableName, 1000);
+        List<String> pretty = hutil.format(r);
+        for(String next : pretty){
+            System.err.println(next);
+        }
+    }
+
+
+
+    public static class PutFunction implements Function<String, Put> {
+        private static final long serialVersionUID = 1L;
+        public Put call(String v) throws Exception {
+            String[] cells = v.split(",");
+            Put put = new Put(Bytes.toBytes(cells[0]));
+            put.addColumn(Bytes.toBytes(cells[1]), Bytes.toBytes(cells[2]),
+                    Bytes.toBytes(cells[3]));
+            return put;
+        }
+    }
+
+    //@Test
+    public void getPutTest() throws Exception {
         try {
             List<byte[]> list = new ArrayList<>();
             list.add(Bytes.toBytes("1"));
@@ -115,7 +168,9 @@ public class SparkHBaseITCase {
                     while (t._1().hasNext()) {
                         byte[] b = t._1().next();
                         Result r = table.get(new Get(b));
-                        if (r.getExists()) {
+                        // getExists() may return null...
+                        Boolean exists = r.getExists();
+                        if (exists != null && exists) {
                             mutator.mutate(new Put(b));
                         }
                     }
@@ -127,6 +182,14 @@ public class SparkHBaseITCase {
             });
         } finally {
             sc.stop();
+        }
+
+        //go look at what the heck is in the table
+        System.err.println("*************************************************");
+        Result[] r = hutil.first(tableName, 1000);
+        List<String> pretty = hutil.format(r);
+        for(String next : pretty){
+            System.err.println(next);
         }
     }
 
