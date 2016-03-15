@@ -186,16 +186,15 @@ public class HBaseUtil {
     }
 
     /**
-     * Raw Scan interface to HBase
+     * Raw Scan interface to HBase, just get the first n rows
      * @param tableName  - The table to get the results from.
      * @param n          - The number of results to return
      * @return
      * @throws IOException
      */
-    public Result[] scan(String tableName, String colFamName, int n) throws IOException {
+    public Result[] first(String tableName, int n) throws IOException {
         try (Table table = connection.getTable(TableName.valueOf(tableName))) {
             Scan scan = new Scan();
-            scan.addFamily(Bytes.toBytes(colFamName));
             ResultScanner scanner = table.getScanner(scan);
             return scanner.next(n);
         }

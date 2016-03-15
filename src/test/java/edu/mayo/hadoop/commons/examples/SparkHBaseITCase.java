@@ -48,7 +48,8 @@ public class SparkHBaseITCase implements Serializable {
     // Logger
     private static final Logger LOG = LoggerFactory.getLogger(SparkHBaseITCase.class);
 
-    private static String tableName = "SparkHBaseTable";
+    private static final String tableName = "SparkHBaseTable";
+    private static final String[] columnFamily = {"cf1", "cf2"};
     private static SparkConf sconf;
     private static JavaSparkContext sc;
     private static Configuration configuration;
@@ -96,6 +97,54 @@ public class SparkHBaseITCase implements Serializable {
     // private JavaHBaseMapGetPutExample() {}
 
     @Test
+    public void testBulkPut() throws IOException {
+
+
+        try {
+            List<String> list = new ArrayList<>();
+            list.add("1," + columnFamily[0] + ",a,1");
+            list.add("2," + columnFamily[0] + ",a,2");
+            list.add("3," + columnFamily[0] + ",a,3");
+            list.add("4," + columnFamily[0] + ",a,4");
+            list.add("5," + columnFamily[0] + ",a,5");
+
+            JavaRDD<String> rdd = sc.parallelize(list);
+
+            //Configuration conf = HBaseConfiguration.create();
+
+            JavaHBaseContext hbaseContext = new JavaHBaseContext(sc, configuration);
+
+            hbaseContext.bulkPut(rdd,
+                    TableName.valueOf(tableName),
+                    new PutFunction());
+        } finally {
+            //not sure I should stop this thing here!
+            sc.stop();
+        }
+
+        //go look at what the heck is in the table
+        System.err.println("*************************************************");
+        Result[] r = hutil.first(tableName, 1000);
+        List<String> pretty = hutil.format(r);
+        for(String next : pretty){
+            System.err.println(next);
+        }
+    }
+
+
+
+    public static class PutFunction implements Function<String, Put> {
+        private static final long serialVersionUID = 1L;
+        public Put call(String v) throws Exception {
+            String[] cells = v.split(",");
+            Put put = new Put(Bytes.toBytes(cells[0]));
+            put.addColumn(Bytes.toBytes(cells[1]), Bytes.toBytes(cells[2]),
+                    Bytes.toBytes(cells[3]));
+            return put;
+        }
+    }
+
+    //@Test
     public void getPutTest() throws Exception {
         try {
             List<byte[]> list = new ArrayList<>();
@@ -133,6 +182,14 @@ public class SparkHBaseITCase implements Serializable {
             });
         } finally {
             sc.stop();
+        }
+
+        //go look at what the heck is in the table
+        System.err.println("*************************************************");
+        Result[] r = hutil.first(tableName, 1000);
+        List<String> pretty = hutil.format(r);
+        for(String next : pretty){
+            System.err.println(next);
         }
     }
 

@@ -100,7 +100,7 @@ public class HBaseUtilITCase {
         hutil.put(tableName, "key1", columnFamily[0], "field3", "Y");
         b = hutil.get(tableName, "key2",columnFamily[0],"field2");
         assertEquals("X",Bytes.toString(b));
-        List<String> pretty = hutil.format(hutil.scan(tableName,columnFamily[0], 1000));
+        List<String> pretty = hutil.format(hutil.first(tableName, 1000));
         for(String line : pretty){
             System.err.println(line);
         }
@@ -121,20 +121,23 @@ public class HBaseUtilITCase {
 
     @Test
     public void testScan() throws Exception {
+        hutil.dropAll();
+        hutil.createTable(tableName,columnFamily);
+        load();
+
         ArrayList<String> expected = new ArrayList<String>();//note, we don't care about whitespace!
         expected.add("key1");
         expected.add("cf1");
         expected.add("Key : field1, Value : value1");
         expected.add("NumericalValue : 123");
         expected.add("NumericalValue : 1.23");
+        expected.add("cf2");
+        expected.add("Key : field4, Value : value1");
         expected.add("key2");
         expected.add("cf1");
         expected.add("Key : field2, Value : value2,");
 
-        hutil.dropAll();
-        hutil.createTable(tableName,columnFamily);
-        load();
-        Result[] results = hutil.scan(tableName,columnFamily[0], 1000);
+        Result[] results = hutil.first(tableName, 1000);
         List<String> pretty = hutil.format(results);
         int i = 0;
         for(String line : pretty){
@@ -142,6 +145,9 @@ public class HBaseUtilITCase {
             assertTrue(line.contains(expected.get(i)));
             i++;
         }
+
+        //todo: build test cases to start scanning at different places in the hbase table structure!
+
         hutil.dropAll();
     }
 }
