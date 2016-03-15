@@ -3,7 +3,6 @@ package hbase;
 import com.tinkerpop.pipes.util.Pipeline;
 import edu.mayo.genomics.model.Variant;
 import edu.mayo.pipes.UNIX.CatPipe;
-import hbase.util.HBaseConnector;
 import hbase.util.HBaseSchema;
 import org.apache.hadoop.hbase.client.Connection;
 
