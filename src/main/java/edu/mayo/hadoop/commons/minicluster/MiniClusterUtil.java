@@ -5,6 +5,7 @@ import com.github.sakserv.minicluster.impl.HbaseLocalCluster;
 import com.github.sakserv.minicluster.impl.HdfsLocalCluster;
 import com.github.sakserv.minicluster.impl.YarnLocalCluster;
 import com.github.sakserv.minicluster.impl.ZookeeperLocalCluster;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 
@@ -36,7 +37,7 @@ public class MiniClusterUtil {
     private static ZookeeperLocalCluster zookeeperLocalCluster;
     private static HdfsLocalCluster hdfsLocalCluster;
     private static HbaseLocalCluster hbaseLocalCluster;
-
+    private static YarnLocalCluster yarnLocalCluster;
     /**
      * starts all the services we need.
      *
@@ -47,22 +48,6 @@ public class MiniClusterUtil {
         startYarn(prop);
         startHBASE(prop);
     }
-
-    // public HdfsLocalCluster startHDFS() throws Exception {
-    // HdfsLocalCluster hdfsLocalCluster = new HdfsLocalCluster.Builder()
-    // .setHdfsNamenodePort(12345)
-    // .setHdfsNamenodeHttpPort(12341)
-    // .setHdfsTempDir("embedded_hdfs")
-    // .setHdfsNumDatanodes(1)
-    // .setHdfsEnablePermissions(false)
-    // .setHdfsFormat(true)
-    // .setHdfsEnableRunningUserAsProxyUser(true)
-    // .setHdfsConfig(new Configuration())
-    // .build();
-    //
-    // hdfsLocalCluster.start();
-    // return hdfsLocalCluster;
-    // }
 
     public static synchronized ZookeeperLocalCluster startZookeeper(Properties props) throws Exception {
         if (!zookeeperStarted) {
