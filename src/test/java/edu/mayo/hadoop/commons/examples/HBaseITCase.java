@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
+import com.google.protobuf.ServiceException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -26,11 +26,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.protobuf.ServiceException;
+import java.io.IOException;
 
 import edu.mayo.hadoop.commons.hbase.AutoConfigure;
 import edu.mayo.hadoop.commons.hbase.HBaseUtil;
-import edu.mayo.hadoop.commons.minicluster.MiniClusterUtil;
 
 public class HBaseITCase {
 
@@ -39,7 +38,7 @@ public class HBaseITCase {
 
     @AfterClass
     public static void tearDown() throws Exception {
-        MiniClusterUtil.stopAll();
+        AutoConfigure.stop();
     }
 
     @Test
@@ -98,7 +97,8 @@ public class HBaseITCase {
         }
     }
 
-    private static void createHbaseTable(Connection connection, String tableName, String colFamily, Configuration configuration) throws Exception {
+    private static void createHbaseTable(Connection connection, String tableName, String colFamily,
+            Configuration configuration) throws Exception {
         try (Admin admin = connection.getAdmin()) {
             HTableDescriptor hTableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
             HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(colFamily);
@@ -107,7 +107,8 @@ public class HBaseITCase {
         }
     }
 
-    private static void putRow(Connection connection, String tableName, String colFamName, String rowKey, String colQualifier, String value, Configuration configuration) throws Exception {
+    private static void putRow(Connection connection, String tableName, String colFamName, String rowKey,
+            String colQualifier, String value, Configuration configuration) throws Exception {
         try (Table table = connection.getTable(TableName.valueOf(tableName))) {
             Put put = new Put(Bytes.toBytes(rowKey));
             put.addColumn(Bytes.toBytes(colFamName), Bytes.toBytes(colQualifier), Bytes.toBytes(value));
@@ -115,7 +116,8 @@ public class HBaseITCase {
         }
     }
 
-    private static Result getRow(Connection connection, String tableName, String colFamName, String rowKey, String colQualifier, Configuration configuration) throws Exception {
+    private static Result getRow(Connection connection, String tableName, String colFamName, String rowKey,
+            String colQualifier, Configuration configuration) throws Exception {
         Result result = null;
         try (Table table = connection.getTable(TableName.valueOf(tableName))) {
             // HTable table = new HTable(configuration, tableName);
