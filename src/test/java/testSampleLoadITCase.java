@@ -18,6 +18,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class testSampleLoadITCase {
 
+    static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(testSampleLoadITCase.class);
+
     Configuration configuration;
     HBaseConnector hconnect;
     HBaseUtil hutil;
