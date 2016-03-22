@@ -30,7 +30,7 @@
         <dependency>
             <groupId>edu.mayo</groupId>
             <artifactId>hadoop-commons</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0-20160317.155303-3</version>
         </dependency>
 
 
@@ -105,6 +105,18 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>mayo-nexus-bsi</id>
+            <name>Mayo Internal BSI Nexus releases</name>
+            <url>http://nexus.mayo.edu/content/repositories/hsr_bsi/</url>
+        </repository>
 
+        <snapshotRepository>
+            <id>mayo-nexus-bsi</id>
+            <name>Mayo Internal BSI Nexus snapshots</name>
+            <url>http://nexus.mayo.edu/content/repositories/hsr_bsi-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>
