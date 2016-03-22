@@ -1,6 +1,8 @@
 import edu.mayo.genomics.model.Sample;
-import hbase.util.HBaseConnector;
+import edu.mayo.hadoop.commons.hbase.AutoConfigure;
+import edu.mayo.hadoop.commons.hbase.HBaseConnector;
 import hbase.util.HBaseSchema;
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -31,7 +33,8 @@ public class testSampleLoadITCase {
             assertEquals(meta.get("patient_id"),"1290344");
 
             //now push the data to hbase and make sure it is there correctly
-            HBaseConnector conn = new HBaseConnector();
+            Configuration config = AutoConfigure.getConfiguration();
+            HBaseConnector conn = new HBaseConnector(config);
             conn.connect();
             HBaseSchema schema = new HBaseSchema(conn);
             schema.dropAll();
