@@ -3,7 +3,6 @@ package hbase;
 import com.tinkerpop.pipes.util.Pipeline;
 import edu.mayo.genomics.model.Variant;
 import edu.mayo.pipes.UNIX.CatPipe;
-import hbase.util.HBaseConnector;
 import hbase.util.HBaseSchema;
 import org.apache.hadoop.hbase.client.Connection;
 
@@ -52,7 +51,7 @@ public class VCFParser {
                 if(config.includeline(line)) {
                     Variant v = new Variant(line);
                     System.out.println(v.hash());
-                    schema.put(schema.VARIANTS_TABLE, schema.ANNOTATION_CF, "linecontents", line);
+                    //schema.put(schema.VARIANTS_TABLE, schema.ANNOTATION_CF, "linecontents", line);
 
                     //System.out.println(line);
                 }
@@ -65,20 +64,20 @@ public class VCFParser {
 
     public static void main(String[] args) throws Exception {
         //connect
-        HBaseConnector conn = new HBaseConnector();
-        conn.connect();
-        //get schema utilities
-        HBaseSchema schema = new HBaseSchema(conn);
-        //connect to hbase and setup the schema
-        schema.dropAll();
-        schema.setupSchema();
-        //configure the parser
-        VCFParserConfig config = new VCFParserConfig();
-        VCFParser parser = new VCFParser(config, schema);
-
-        //parse the file
-        parser.parse("/data/VCF/NA_1424005550.gvcf.gz");//todo: need to wire in the CLI to enable command line loading
-        conn.close();
+//        HBaseConnector conn = new HBaseConnector();
+//        conn.connect();
+//        //get schema utilities
+//        HBaseSchema schema = new HBaseSchema(conn);
+//        //connect to hbase and setup the schema
+//        schema.dropAll();
+//        schema.setupSchema();
+//        //configure the parser
+//        VCFParserConfig config = new VCFParserConfig();
+//        VCFParser parser = new VCFParser(config, schema);
+//
+//        //parse the file
+//        parser.parse("/data/VCF/NA_1424005550.gvcf.gz");//todo: need to wire in the CLI to enable command line loading
+//        conn.close();
     }
 
 
