@@ -165,5 +165,33 @@
             <url>http://nexus.mayo.edu/content/repositories/hsr_bsi-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+    <!-- Mayo specific repos -->
+    <repositories>
+      <repository>
+        <id>mayo-nexus-bsi</id>
+        <name>Mayo Internal BSI Nexus releases</name>
+        <url>http://nexus.mayo.edu/content/repositories/hsr_bsi/</url>
+      </repository>
+
+      <repository>
+        <id>mayo-nexus-bsi-snapshot</id>
+        <name>Mayo Internal BSI Nexus snapshots</name>
+        <url>http://nexus.mayo.edu/content/repositories/hsr_bsi-snapshots</url>
+      </repository>
+      <repository>
+        <id>mayo-nexus-bsi-3rd</id>
+        <name>Mayo Internal BSI Nexus snapshots</name>
+        <url>http://nexus.mayo.edu/content/repositories/thirdparty/</url>
+      </repository>
+      <repository>
+        <id>central</id>
+        <name>Maven Repository Switchboard</name>
+        <layout>default</layout>
+        <url>http://repo1.maven.org/maven2</url>
+        <snapshots>
+          <enabled>false</enabled>
+        </snapshots>
+      </repository>
+    </repositories>
 
 </project>
