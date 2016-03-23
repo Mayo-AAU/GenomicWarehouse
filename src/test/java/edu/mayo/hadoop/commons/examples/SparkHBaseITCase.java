@@ -1,11 +1,5 @@
 package edu.mayo.hadoop.commons.examples;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.BufferedMutator;
@@ -28,6 +22,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import edu.mayo.hadoop.commons.hbase.AutoConfigure;
 import edu.mayo.hadoop.commons.hbase.HBaseUtil;
@@ -85,20 +85,13 @@ public class SparkHBaseITCase implements Serializable {
 
     @Test
     public void testConnect() throws Exception {
-
-        ArrayList<Integer> values = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            values.add(i);
-        }
-        // rdd = sc.parallelize(values).map(x -> x);
-
+        JavaHBaseContext hbaseContext = new JavaHBaseContext(sc, configuration);
     }
 
     // private JavaHBaseMapGetPutExample() {}
 
     @Test
     public void testBulkPut() throws IOException {
-
 
         try {
             List<String> list = new ArrayList<>();
@@ -110,41 +103,37 @@ public class SparkHBaseITCase implements Serializable {
 
             JavaRDD<String> rdd = sc.parallelize(list);
 
-            //Configuration conf = HBaseConfiguration.create();
+            // Configuration conf = HBaseConfiguration.create();
 
             JavaHBaseContext hbaseContext = new JavaHBaseContext(sc, configuration);
 
-            hbaseContext.bulkPut(rdd,
-                    TableName.valueOf(tableName),
-                    new PutFunction());
+            hbaseContext.bulkPut(rdd, TableName.valueOf(tableName), new PutFunction());
         } finally {
-            //not sure I should stop this thing here!
+            // not sure I should stop this thing here!
             sc.stop();
         }
 
-        //go look at what the heck is in the table
+        // go look at what the heck is in the table
         System.err.println("*************************************************");
         Result[] r = hutil.first(tableName, 1000);
         List<String> pretty = hutil.format(r);
-        for(String next : pretty){
+        for (String next : pretty) {
             System.err.println(next);
         }
     }
 
-
-
     public static class PutFunction implements Function<String, Put> {
         private static final long serialVersionUID = 1L;
+        @Override
         public Put call(String v) throws Exception {
             String[] cells = v.split(",");
             Put put = new Put(Bytes.toBytes(cells[0]));
-            put.addColumn(Bytes.toBytes(cells[1]), Bytes.toBytes(cells[2]),
-                    Bytes.toBytes(cells[3]));
+            put.addColumn(Bytes.toBytes(cells[1]), Bytes.toBytes(cells[2]), Bytes.toBytes(cells[3]));
             return put;
         }
     }
 
-    //@Test
+    // @Test
     public void getPutTest() throws Exception {
         try {
             List<byte[]> list = new ArrayList<>();
@@ -184,11 +173,11 @@ public class SparkHBaseITCase implements Serializable {
             sc.stop();
         }
 
-        //go look at what the heck is in the table
+        // go look at what the heck is in the table
         System.err.println("*************************************************");
         Result[] r = hutil.first(tableName, 1000);
         List<String> pretty = hutil.format(r);
-        for(String next : pretty){
+        for (String next : pretty) {
             System.err.println(next);
         }
     }
