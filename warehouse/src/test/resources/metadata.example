@@ -1,0 +1,8 @@
+sample=MySample
+kit_id=SimplexoCustomCapture
+study_id=Simplexo
+tumorType=Breast
+tumor=true
+status=case
+age=35
+patient_id=1290344
