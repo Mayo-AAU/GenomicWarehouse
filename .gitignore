@@ -1,3 +1,7 @@
 _book
 node_modules
-/target/
+# Ignore target folders of all Maven projects
+**/target/
+# Ignore internal IntelliJ files
+.idea
+**/*.iml
