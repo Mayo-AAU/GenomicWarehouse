@@ -22,12 +22,12 @@ public class LoadVCF {
         try (Connection hcon = ConnectionFactory.createConnection(configuration)) {
             HBaseUtil hutil = new HBaseUtil(hcon);
 
-            hutil.createTable(VCFParser.Table, VCFParser.families);
-
             VCFParserConfig config;
             try (InputStream stream = LoadVCF.class.getClassLoader().getResourceAsStream("/VCFParser.properties")) {
                 config = new VCFParserConfig(stream);
             }
+            hutil.createTable(VCFParser.Table, VCFParser.families);
+            hutil.createTable(VCFParserConfig.getTableName(), VCFParserConfig.getColumnFamily());
             VCFParser parser = new VCFParser(config);
             parser.parse(filename, VCFParser.Table);
 
