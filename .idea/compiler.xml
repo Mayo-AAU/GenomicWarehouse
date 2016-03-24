@@ -27,9 +27,9 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="gwarehouse" target="1.5" />
-      <module name="hdcommons" target="1.5" />
-      <module name="warehouse" target="1.5" />
+      <module name="gwarehouse" target="1.8" />
+      <module name="hdcommons" target="1.8" />
+      <module name="warehouse" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

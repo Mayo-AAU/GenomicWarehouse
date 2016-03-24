@@ -1,12 +1,10 @@
 package hbase;
 
-import com.tinkerpop.pipes.util.Pipeline;
 import edu.mayo.genomics.model.Variant;
 import edu.mayo.hadoop.commons.hbase.AutoConfigure;
 import edu.mayo.hadoop.commons.hbase.HBaseConnector;
 import edu.mayo.hadoop.commons.hbase.HBaseUtil;
 import edu.mayo.hadoop.commons.minicluster.MiniClusterUtil;
-import edu.mayo.pipes.UNIX.CatPipe;
 import hbase.util.HBaseSchema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;

@@ -3,7 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/warehouse/gwarehouse.iml" filepath="$PROJECT_DIR$/warehouse/gwarehouse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/warehouse/gwarehouse.iml" filepath="$PROJECT_DIR$/warehouse/gwarehouse.iml" />
       <module fileurl="file://$PROJECT_DIR$/hdcommons/hdcommons.iml" filepath="$PROJECT_DIR$/hdcommons/hdcommons.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hdcommons/hdcommons.iml" filepath="$PROJECT_DIR$/hdcommons/hdcommons.iml" />
+      <module fileurl="file://$PROJECT_DIR$/warehouse.iml" filepath="$PROJECT_DIR$/warehouse.iml" />
       <module fileurl="file://$PROJECT_DIR$/warehouse.iml" filepath="$PROJECT_DIR$/warehouse.iml" />
     </modules>
   </component>
