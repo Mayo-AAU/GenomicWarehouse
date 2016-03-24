@@ -302,5 +302,17 @@ public class HBaseUtil {
         }
     }
 
+    /**
+     * simple method that works on a small amount of data to check if a given row exists in hbase
+     * @param table
+     * @param rowKey
+     * @throws IOException
+     */
+    public boolean rowExists(String table, String rowKey) throws IOException {
+        Table t = connection.getTable(TableName.valueOf(table));
+        Get get = new Get(Bytes.toBytes(rowKey));
+        return t.exists(get);
+    }
+
 
 }

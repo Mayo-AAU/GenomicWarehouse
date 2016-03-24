@@ -1,23 +1,23 @@
 package edu.mayo.hadoop.commons.examples;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.Watcher.Event.KeeperState;
+import org.apache.zookeeper.ZooKeeper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.sakserv.minicluster.config.ConfigVars;
-import com.github.sakserv.minicluster.impl.ZookeeperLocalCluster;
+import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
-import edu.mayo.hadoop.commons.minicluster.MiniClusterUtil;
+import edu.mayo.hadoop.commons.hbase.AutoConfigure;
 
 /**
- * Created by m102417 on 2/12/16. checks that Zookeeper is up and running and
- * correctly responds to queries on localhost
+ * Created by m102417 on 2/12/16. checks that Zookeeper is up and running and correctly responds to queries on localhost
  */
 public class ZookeeperITCase {
 
@@ -25,23 +25,36 @@ public class ZookeeperITCase {
 
     @Before
     public void setup() throws Exception {
-        try (InputStream stream = HBaseITCase.class.getResourceAsStream("/zookeeper.properties")) {
-            prop = MiniClusterUtil.loadPropertiesStream(stream);
-        }
-        MiniClusterUtil.startZookeeper(prop);
+        // Get a config, just to have AutoConfigure startup the cluster
+        AutoConfigure.getConfiguration();
     }
 
     @After
     public void teardown() throws Exception {
-        MiniClusterUtil.stopZookeeper();
+        AutoConfigure.stop();
     }
 
     /**
      * tests that zookeeper is up and running
+     * 
+     * @see https://ihong5.wordpress.com/2014/05/27/maven-how-to-connect-to-a-zookeeper-in-java/
+     * 
+     * @throws Exception
      */
     @Test
-    public void running() {
-        ZookeeperLocalCluster zookeeperLocalCluster = MiniClusterUtil.getZookeeperLocalCluster();
-        assertEquals(prop.getProperty(ConfigVars.ZOOKEEPER_CONNECTION_STRING_KEY), zookeeperLocalCluster.getZookeeperConnectionString());
+    public void running() throws Exception {
+        CountDownLatch connectedSignal = new CountDownLatch(1);
+
+        ZooKeeper zookeeper = new ZooKeeper("127.0.0.1:22010", 5000, new Watcher() {
+
+            @Override
+            public void process(WatchedEvent event) {
+                if (event.getState() == KeeperState.SyncConnected) {
+                    connectedSignal.countDown();
+                }
+
+            }
+        });
+        assertTrue("Connect to zookeeper", connectedSignal.await(10, TimeUnit.SECONDS));
     }
 }
