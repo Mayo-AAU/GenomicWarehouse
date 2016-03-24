@@ -1,0 +1,9 @@
+/target/
+.classpath
+.project
+.settings
+embedded_hbase
+/build/
+.idea
+.gradle
+/bin/
