@@ -102,4 +102,8 @@ public class HBaseSchema {
     public void dropAll() throws IOException {
         util.dropAll();
     }
+
+    public void close() throws IOException {
+        conn.close();
+    }
 }

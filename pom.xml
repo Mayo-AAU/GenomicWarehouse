@@ -26,11 +26,17 @@
             <version>1.2</version>
         </dependency>
 
-        <!-- hadoop echo-system -->
+        <!-- hadoop ecosystem -->
         <dependency>
             <groupId>edu.mayo</groupId>
             <artifactId>hadoop-commons</artifactId>
-            <version>1.0-20160317.155303-3</version>
+            <version>1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 
@@ -40,6 +46,16 @@
             <groupId>edu.mayo</groupId>
             <artifactId>pipes</artifactId>
             <version>3.0.9</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- genomics -->
@@ -82,6 +98,13 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+            <version>1.1.2.1</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
 
         <!-- testing -->
         <dependency>
@@ -103,6 +126,30 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.4.1</version>
+                    <configuration>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <archive>
+                            <manifest>
+                                <mainClass>edu.mayo.genomics.LoadVCF</mainClass>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            
         </plugins>
     </build>
     <distributionManagement>
@@ -118,5 +165,33 @@
             <url>http://nexus.mayo.edu/content/repositories/hsr_bsi-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+    <!-- Mayo specific repos -->
+    <repositories>
+      <repository>
+        <id>mayo-nexus-bsi</id>
+        <name>Mayo Internal BSI Nexus releases</name>
+        <url>http://nexus.mayo.edu/content/repositories/hsr_bsi/</url>
+      </repository>
+
+      <repository>
+        <id>mayo-nexus-bsi-snapshot</id>
+        <name>Mayo Internal BSI Nexus snapshots</name>
+        <url>http://nexus.mayo.edu/content/repositories/hsr_bsi-snapshots</url>
+      </repository>
+      <repository>
+        <id>mayo-nexus-bsi-3rd</id>
+        <name>Mayo Internal BSI Nexus snapshots</name>
+        <url>http://nexus.mayo.edu/content/repositories/thirdparty/</url>
+      </repository>
+      <repository>
+        <id>central</id>
+        <name>Maven Repository Switchboard</name>
+        <layout>default</layout>
+        <url>http://repo1.maven.org/maven2</url>
+        <snapshots>
+          <enabled>false</enabled>
+        </snapshots>
+      </repository>
+    </repositories>
 
 </project>
