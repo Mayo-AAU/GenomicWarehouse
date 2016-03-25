@@ -55,7 +55,7 @@ public class VCFParser implements Serializable {
     public void startup() throws Exception {
         //startup the hbase client
         Configuration config = AutoConfigure.getConfiguration();
-        HBaseConnector conn = new HBaseConnector(config);
+        //HBaseConnector conn = new HBaseConnector(config);
         //todo:this is causing problems!
         //conn.connect();
         //schema = new HBaseSchema(conn);
@@ -96,6 +96,7 @@ public class VCFParser implements Serializable {
 
             hbaseContext.bulkPut(vcflines, TableName.valueOf(tableName), new PutVCFRowFunction());
         }finally {
+
             sc.stop();
         }
 
