@@ -34,7 +34,7 @@
         <!-- hadoop ecosystem -->
         <dependency>
             <groupId>edu.mayo.genomics</groupId>
-            <artifactId>hdcommons</artifactId>
+            <artifactId>hadoop-commons</artifactId>
             <version>1.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
