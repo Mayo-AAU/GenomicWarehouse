@@ -28,7 +28,7 @@ public class VCFParserTestITCase extends TestCase {
     private static SparkConf sconf;
     private static JavaSparkContext sc;
     private static Configuration configuration;
-    //private static JavaHBaseContext hbaseContext;
+    private static JavaHBaseContext hbaseContext;
     private static Connection hconnect;
     private static HBaseUtil hutil;
     private static VCFParserConfig config;
@@ -41,14 +41,14 @@ public class VCFParserTestITCase extends TestCase {
         // make a connection on localhost to spark
         // TODO: this needs to use the spark cluster and spark submit if we are
         // on the cluster.
-        //sconf = new SparkConf().setMaster("local").setAppName("Spark-Hbase Connector");
-        //sconf.set("spark.driver.host", "127.0.0.1");
+        sconf = new SparkConf().setMaster("local").setAppName("Spark-Hbase Connector");
+        sconf.set("spark.driver.host", "127.0.0.1");
 
-        //sc = new JavaSparkContext(sconf);
+        sc = new JavaSparkContext(sconf);
 
         // get a connection to hbase
         configuration = AutoConfigure.getConfiguration();
-        //hbaseContext = new JavaHBaseContext(sc, configuration);
+        hbaseContext = new JavaHBaseContext(sc, configuration);
         hconnect = ConnectionFactory.createConnection(configuration);
         hutil = new HBaseUtil(hconnect);
         hutil.createTable(config.getTableName(), config.getColumnFamily());
@@ -64,14 +64,12 @@ public class VCFParserTestITCase extends TestCase {
 
     @Test
     public void testParser() throws Exception {
-        System.err.println("Starting Parser Test");
         setup();
 
-        VCFParser parser = new VCFParser(config);
-        parser.parse("/data/VCF/NA_1424005550_first1000.gvcf.gz", config.getTableName());
+        //VCFParser parser = new VCFParser(config);
+        //parser.parse("/data/VCF/NA_1424005550.gvcf.gz", config.getTableName());
 
         Result[] results = hutil.first(config.getTableName(), 1000);
-        System.err.println("Number of Results: " + results.length);
         List<String> pretty = hutil.format(results);
         int i = 0;
         for(String line : pretty){

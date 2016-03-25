@@ -3,15 +3,15 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <groupId>edu.mayo.genomics</groupId>
+    <artifactId>warehouse</artifactId>
+    <version>1.0-SNAPSHOT</version>
     <parent>
         <groupId>edu.mayo.genomics</groupId>
-        <artifactId>warehouse</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <artifactId>warehouse-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
     </parent>
-
-    <groupId>edu.mayo.genomics.warehouse</groupId>
-    <artifactId>gwarehouse</artifactId>
-    <version>1.0-SNAPSHOT</version>
 
     <dependencies>
         <!-- logging -->
@@ -33,8 +33,8 @@
 
         <!-- hadoop ecosystem -->
         <dependency>
-            <groupId>edu.mayo</groupId>
-            <artifactId>hadoop-commons</artifactId>
+            <groupId>edu.mayo.genomics</groupId>
+            <artifactId>hdcommons</artifactId>
             <version>1.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
@@ -135,7 +135,40 @@
                         </execution>
                     </executions>
                 </plugin>
-            
+
+                <!-- See http://stackoverflow.com/questions/23013941/how-to-put-all-dependencies-in-separate-folder-for-runnable-jar for details on these next two plugins -->
+                <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-dependency-plugin</artifactId>
+    <version>2.5.1</version>
+    <executions>
+      <execution>
+        <id>copy-dependencies</id>
+        <phase>package</phase>
+        <goals>
+        <goal>copy-dependencies</goal>
+        </goals>
+        <configuration>
+        <outputDirectory>${project.build.directory}/lib/</outputDirectory>
+        </configuration>
+      </execution>
+    </executions>
+</plugin>
+
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-jar-plugin</artifactId>
+    <configuration>
+    <archive>
+        <manifest>
+        <addClasspath>true</addClasspath>
+        <classpathPrefix>lib/</classpathPrefix>
+        <mainClass>edu.mayo.genomics.LoadVCF</mainClass>
+        </manifest>
+    </archive>
+    </configuration>
+</plugin>
+
         </plugins>
     </build>
     <distributionManagement>
@@ -153,22 +186,22 @@
     </distributionManagement>
     <!-- Mayo specific repos -->
     <repositories>
-      <repository>
-        <id>mayo-nexus-bsi</id>
-        <name>Mayo Internal BSI Nexus releases</name>
-        <url>http://nexus.mayo.edu/content/repositories/hsr_bsi/</url>
-      </repository>
+      <!-- <repository> -->
+      <!--   <id>mayo-nexus-bsi</id> -->
+      <!--   <name>Mayo Internal BSI Nexus releases</name> -->
+      <!--   <url>http://nexus.mayo.edu/content/repositories/hsr_bsi/</url> -->
+      <!-- </repository> -->
 
-      <repository>
-        <id>mayo-nexus-bsi-snapshot</id>
-        <name>Mayo Internal BSI Nexus snapshots</name>
-        <url>http://nexus.mayo.edu/content/repositories/hsr_bsi-snapshots</url>
-      </repository>
-      <repository>
-        <id>mayo-nexus-bsi-3rd</id>
-        <name>Mayo Internal BSI Nexus snapshots</name>
-        <url>http://nexus.mayo.edu/content/repositories/thirdparty/</url>
-      </repository>
+      <!-- <repository> -->
+      <!--   <id>mayo-nexus-bsi-snapshot</id> -->
+      <!--   <name>Mayo Internal BSI Nexus snapshots</name> -->
+      <!--   <url>http://nexus.mayo.edu/content/repositories/hsr_bsi-snapshots</url> -->
+      <!-- </repository> -->
+      <!-- <repository> -->
+      <!--   <id>mayo-nexus-bsi-3rd</id> -->
+      <!--   <name>Mayo Internal BSI Nexus snapshots</name> -->
+      <!--   <url>http://nexus.mayo.edu/content/repositories/thirdparty/</url> -->
+      <!-- </repository> -->
       <repository>
         <id>central</id>
         <name>Maven Repository Switchboard</name>

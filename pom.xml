@@ -2,15 +2,15 @@
 	    <modelVersion>4.0.0</modelVersion>
 
 	<groupId>edu.mayo.genomics</groupId>
-	<artifactId>warehouse</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>warehouse-parent</artifactId>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Genomics Warehouse</name>
 	<description>Warehouse and Dependancies</description>
 
 	<modules>
-		<module>hdcommons</module>
+		<module>hadoop-commons</module>
 		<module>warehouse</module>
 	</modules>
 
