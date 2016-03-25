@@ -16,3 +16,5 @@ embedded_zk
 /build/
 .gradle
 /bin/
+*.log*
+*gvcf.gz
