@@ -1,11 +1,50 @@
-# GenomicWarehouse
-
+# GenomicWarehouse [![Build Status](https://travis-ci.org/Mayo-AAU/GenomicWarehouse.svg?branch=master)](https://travis-ci.org/Mayo-AAU/GenomicWarehouse)
 This is an open source project that attempts to answer important genomics questions on the big data platform
 
-Make sure you develop using Java SDK 1.8+
+
+# High Level Goals
+
+1. [Recalculate](doc/recalculate.md)
+2. [Ingest](doc/ingest.md)
+3. [Export](doc/export.md)
+4. [Filter](doc/filter.md)
+5. [Interaction](doc/interaction.md)
+
+## Setup requirements
+
+- Essentials
+  - [X] Be able to scale cluster up and down as needed
+  - [X] [Hortonworks Data Platform](http://hortonworks.com/hdp/) `v2.3.4` installed on Azure
+  - [x] Install Java v8
+  - [x] HDFS
+  - [x] Spark
+  - [x] HBase
+  - [ ] Create infrastructure for evaluation
+	 1. [local sandbox](doc/setup.md) for testing / development
+	 2. "small cluster", 3x 8C/32G/10T+
+	 3. "medium cluster", 5x 8C/32G/10T+
+	 4. "large cluster", 7x 8C/32G/10T+
+- Optional, but nice to have
+  - [ ] Jypter
+  - [ ] Zepplin
+
+## Plan
+
+- [X] Write [ingest code](doc/ingest.md)
+   1. create schema in HBase
+   2. ingest sample `.gvcf` files
+- [ ] Write [filter code](doc/filter.md)
+   1. identity filter
+- [ ] Load sample datasets
+- [ ] Write [export code](doc/export.md)
+- [ ] Write [recalculate code](doc/recalculate.md)
+- [ ] Write final report in *Google Documents*
+
+
 
 # Building
-This project uses [Maven](http://maven.apache.org/) as a build system.  [Maven](https://maven.apache.org/index.html) is an old standby build system for Java.  It may be [downloaded here](https://maven.apache.org/download.cgi), or installed via [MacPorts](https://www.macports.org/), e.g. `sudo port install maven`.
+
+This project uses [Maven](http://maven.apache.org/) as a build system.  [Maven](https://maven.apache.org/index.html) is an old standby build system for Java.  It may be [downloaded here](https://maven.apache.org/download.cgi), or installed via [MacPorts](https://www.macports.org/), e.g. `sudo port install maven`.  GenomicWarehouse is build on Java 1.8 or higher.
 
 For Maven <del>noobs</del> beginners, there is a nice [getting started guide](http://maven.apache.org/guides/getting-started/index.htm).
 
@@ -96,45 +135,6 @@ Install on cluster:
 rsync -r --progress target/warehouse-1.0-SNAPSHOT.jar target/lib cluster:path/
 ```
 
-
-# High Level Goals
-
-1. [Recalculate](doc/recalculate.md)
-2. [Ingest](doc/ingest.md)
-3. [Export](doc/export.md)
-4. [Filter](doc/filter.md)
-5. [Interaction](doc/interaction.md)
-
-## Setup requirements
-
-- Essentials
-  - [X] **DJB** Be able to scale cluster up and down as needed
-  - [X] **DJB** [Hortonworks Data Platform](http://hortonworks.com/hdp/) `v2.3.4` installed on Azure
-  - [x] Install Java v8
-  - [x] HDFS
-  - [x] Spark
-  - [x] HBase
-  - [ ] Create infrastructure for evaluation
-	 1. [local sandbox](doc/setup.md) for testing / development
-	 2. "small cluster", 3x 8C/32G/10T+
-	 3. "medium cluster", 5x 8C/32G/10T+
-	 4. "large cluster", 7x 8C/32G/10T+
-- Optional, but nice to have
-  - [ ] Jypter
-  - [ ] Zepplin
-
-## Plan
-
-- [ ] **DJQ** Test/Dev environment https://github.com/drachimera/HadoopCommons
-- [ ] Write [ingest code](doc/ingest.md)
-   1. create schema in HBase
-   2. ingest sample `.gvcf` files
-- [ ] Write [filter code](doc/filter.md)
-   1. identity filter
-- [ ] Load sample datasets
-- [ ] Write [export code](doc/export.md)
-- [ ] Write [recalculate code](doc/recalculate.md)
-- [ ] **DJQ** Write final report *Google Doc*
 
 
 
