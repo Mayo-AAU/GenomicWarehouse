@@ -41,14 +41,14 @@ public class VCFParserTestITCase extends TestCase {
         // make a connection on localhost to spark
         // TODO: this needs to use the spark cluster and spark submit if we are
         // on the cluster.
-        sconf = new SparkConf().setMaster("local").setAppName("Spark-Hbase Connector");
-        sconf.set("spark.driver.host", "127.0.0.1");
+        //sconf = new SparkConf().setMaster("local").setAppName("Spark-Hbase Connector");
+        //sconf.set("spark.driver.host", "127.0.0.1");
 
-        sc = new JavaSparkContext(sconf);
+        //sc = new JavaSparkContext(sconf);
 
         // get a connection to hbase
         configuration = AutoConfigure.getConfiguration();
-        hbaseContext = new JavaHBaseContext(sc, configuration);
+        //hbaseContext = new JavaHBaseContext(sc, configuration);
         hconnect = ConnectionFactory.createConnection(configuration);
         hutil = new HBaseUtil(hconnect);
         hutil.createTable(config.getTableName(), config.getColumnFamily());
@@ -66,8 +66,8 @@ public class VCFParserTestITCase extends TestCase {
     public void testParser() throws Exception {
         setup();
 
-        //VCFParser parser = new VCFParser(config);
-        //parser.parse("/data/VCF/NA_1424005550.gvcf.gz", config.getTableName());
+        VCFParser parser = new VCFParser(config);
+        parser.parse("src/test/resources/testData/test.gvcf", config.getTableName());
 
         Result[] results = hutil.first(config.getTableName(), 1000);
         List<String> pretty = hutil.format(results);
