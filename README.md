@@ -13,8 +13,8 @@ This is an open source project that attempts to answer important genomics questi
 ## Setup requirements
 
 - Essentials
-  - [X] **DJB** Be able to scale cluster up and down as needed
-  - [X] **DJB** [Hortonworks Data Platform](http://hortonworks.com/hdp/) `v2.3.4` installed on Azure
+  - [X] Be able to scale cluster up and down as needed
+  - [X] [Hortonworks Data Platform](http://hortonworks.com/hdp/) `v2.3.4` installed on Azure
   - [x] Install Java v8
   - [x] HDFS
   - [x] Spark
@@ -38,11 +38,12 @@ This is an open source project that attempts to answer important genomics questi
 - [ ] Load sample datasets
 - [ ] Write [export code](doc/export.md)
 - [ ] Write [recalculate code](doc/recalculate.md)
-- [ ] Write final report *Google Doc*
+- [ ] Write final report in *Google Documents*
 
 
 
 # Building
+
 This project uses [Maven](http://maven.apache.org/) as a build system.  [Maven](https://maven.apache.org/index.html) is an old standby build system for Java.  It may be [downloaded here](https://maven.apache.org/download.cgi), or installed via [MacPorts](https://www.macports.org/), e.g. `sudo port install maven`.  GenomicWarehouse is build on Java 1.8 or higher.
 
 For Maven <del>noobs</del> beginners, there is a nice [getting started guide](http://maven.apache.org/guides/getting-started/index.htm).
