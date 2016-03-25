@@ -4,6 +4,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.log4j.Logger;
 
 import java.io.InputStream;
 import java.util.List;
@@ -14,33 +15,36 @@ import hbase.VCFParser;
 import hbase.VCFParserConfig;
 
 public class LoadVCF {
+    private static final Logger logger = Logger.getLogger(LoadVCF.class);
+
     public static void main(String[] args) throws Exception {
 
         String filename = args[0];
-
+        logger.info("Starting LoadVCF... loading: " + filename);
         Configuration configuration = AutoConfigure.getConfiguration();
         try (Connection hcon = ConnectionFactory.createConnection(configuration)) {
             HBaseUtil hutil = new HBaseUtil(hcon);
-
-            VCFParserConfig config;
-            try (InputStream stream = LoadVCF.class.getClassLoader().getResourceAsStream("/VCFParser.properties")) {
-                config = new VCFParserConfig(stream);
-            }
             hutil.createTable(VCFParser.Table, VCFParser.families);
             hutil.createTable(VCFParserConfig.getTableName(), VCFParserConfig.getColumnFamily());
-            VCFParser parser = new VCFParser(config);
-            parser.parse(filename, VCFParser.Table);
 
-            Result[] results = hutil.first(VCFParser.Table, 1000);
+            VCFParserConfig config;
+            try (InputStream stream = LoadVCF.class.getResourceAsStream("/VCFParser.properties")) {
+                logger.info("Loading properties from stream: " + stream);
+                config = new VCFParserConfig(stream);
+            }
+
+            VCFParser parser = new VCFParser(config);
+            parser.parse(filename, VCFParserConfig.getTableName());
+
+            Result[] results = hutil.first(VCFParserConfig.getTableName(), 1000);
             List<String> pretty = hutil.format(results);
             int i = 0;
             for (String line : pretty) {
                 System.out.println(line);
                 i++;
             }
-        } finally {
-
         }
+        System.exit(0);
         // parser.shutdown();
 
         // connect
