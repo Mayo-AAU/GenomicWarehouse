@@ -5,3 +5,14 @@ node_modules
 # Ignore internal IntelliJ files
 .idea
 **/*.iml
+# Ignore Eclipse settings
+.settings
+.classpath
+.project
+
+# Misc
+embedded_hbase
+embedded_zk
+/build/
+.gradle
+/bin/
