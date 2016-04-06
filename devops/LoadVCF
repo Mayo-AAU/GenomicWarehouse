@@ -4,8 +4,9 @@
 #
 # an example would be:
 # ./LoadVCF hdfs://master3:8020/user/sandbox/vcf/NA_1401601611.gvcf.bz2
-# A full genome file...
+# Full genome files:
 # ./LoadVCF hdfs://master3:8020/user/sandbox/vcf/11-000114_1535102592.gvcf.bz2
+# ./LoadVCF hdfs://master3:8020/user/sandbox/vcf/11-000114_1535102591.gvcf.bz2
 
 
 # Construct the classpath
