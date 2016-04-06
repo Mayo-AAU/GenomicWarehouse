@@ -1,8 +1,20 @@
 package edu.mayo.hadoop.commons.examples;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
@@ -19,15 +31,11 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import edu.mayo.hadoop.commons.hbase.AutoConfigure;
 import edu.mayo.hadoop.commons.hbase.HBaseUtil;
@@ -41,6 +49,7 @@ import scala.Tuple2;
  *
  *
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class SparkHBaseITCase implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -53,7 +62,7 @@ public class SparkHBaseITCase implements Serializable {
     private static SparkConf sconf;
     private static JavaSparkContext sc;
     private static Configuration configuration;
-    private static JavaHBaseContext hbaseContext;
+//    private static JavaHBaseContext hbaseContext;
     private static Connection hconnect;
     private static HBaseUtil hutil;
 
@@ -69,7 +78,7 @@ public class SparkHBaseITCase implements Serializable {
 
         // get a connection to hbase
         configuration = AutoConfigure.getConfiguration();
-        hbaseContext = new JavaHBaseContext(sc, configuration);
+//        hbaseContext = new JavaHBaseContext(sc, configuration);
         hconnect = ConnectionFactory.createConnection(configuration);
         hutil = new HBaseUtil(hconnect);
         hutil.createTable(tableName, new String[]{"cf1"});
@@ -77,30 +86,34 @@ public class SparkHBaseITCase implements Serializable {
     }
 
     @AfterClass
-    public static void shutdown() throws IOException {
+    public static void shutdown() throws Exception {
         // sc.stop(); //should this be done here or in the finally clause of
         // each method?
+    	sc.close();
+    	sc.stop();
         hconnect.close();
+        AutoConfigure.stop();
     }
 
     @Test
-    public void testConnect() throws Exception {
+    public void test1Connect() throws Exception {
         JavaHBaseContext hbaseContext = new JavaHBaseContext(sc, configuration);
     }
 
     // private JavaHBaseMapGetPutExample() {}
 
     @Test
-    public void testBulkPut() throws IOException {
+    public void test2BulkPut() throws Exception {
 
         try {
-            List<String> list = new ArrayList<>();
-            list.add("1," + columnFamily[0] + ",a,1");
-            list.add("2," + columnFamily[0] + ",a,2");
-            list.add("3," + columnFamily[0] + ",a,3");
-            list.add("4," + columnFamily[0] + ",a,4");
-            list.add("5," + columnFamily[0] + ",a,5");
-
+//            List<String> list = new ArrayList<>();
+//            list.add("1," + columnFamily[0] + ",a,1");
+//            list.add("2," + columnFamily[0] + ",a,2");
+//            list.add("3," + columnFamily[0] + ",a,3");
+//            list.add("4," + columnFamily[0] + ",a,4");
+//            list.add("5," + columnFamily[0] + ",a,5");
+        	List<String> list = readGVCF("14-001385_1426204023_SOMATIC.gvcf", 1000000);
+        	
             JavaRDD<String> rdd = sc.parallelize(list);
 
             // Configuration conf = HBaseConfiguration.create();
@@ -110,84 +123,186 @@ public class SparkHBaseITCase implements Serializable {
             hbaseContext.bulkPut(rdd, TableName.valueOf(tableName), new PutFunction());
         } finally {
             // not sure I should stop this thing here!
-            sc.stop();
+//            sc.stop();
         }
 
         // go look at what the heck is in the table
         System.err.println("*************************************************");
-        Result[] r = hutil.first(tableName, 1000);
+        Result[] r = hutil.first(tableName, 10);
         List<String> pretty = hutil.format(r);
         for (String next : pretty) {
             System.err.println(next);
         }
+        
+        System.err.println ("Test bulkPut succeeded");
+        
     }
 
+    public static final byte[] cf1Bytes = Bytes.toBytes("cf1");
+    public static final byte[] chrBytes = Bytes.toBytes("chr");
+    public static final byte[] posBytes = Bytes.toBytes("pos");
+    public static final byte[] idBytes = Bytes.toBytes("id");
+    public static final byte[] refBytes = Bytes.toBytes("ref");
+    public static final byte[] altBytes = Bytes.toBytes("alt");
+    public static final byte[] qualBytes = Bytes.toBytes("qual");
+    public static final byte[] filterBytes = Bytes.toBytes("filter");
+    public static final byte[] infoBytes = Bytes.toBytes("info");
+    public static final byte[] sampleBytes = Bytes.toBytes("sample1");
+    
     public static class PutFunction implements Function<String, Put> {
         private static final long serialVersionUID = 1L;
         @Override
         public Put call(String v) throws Exception {
-            String[] cells = v.split(",");
-            Put put = new Put(Bytes.toBytes(cells[0]));
-            put.addColumn(Bytes.toBytes(cells[1]), Bytes.toBytes(cells[2]), Bytes.toBytes(cells[3]));
-            return put;
+            String[] cells = v.split("\t");
+            Put put = new Put(Bytes.toBytes(cells[0] + ":" + cells[1] + ":" + cells[3] + "/" + cells [4]));
+            put.addColumn(cf1Bytes, chrBytes, Bytes.toBytes(cells[0]));
+            put.addColumn(cf1Bytes, posBytes, Bytes.toBytes(cells[1]));
+            put.addColumn(cf1Bytes, idBytes, Bytes.toBytes(cells[2]));
+            put.addColumn(cf1Bytes, refBytes, Bytes.toBytes(cells[3]));
+            put.addColumn(cf1Bytes, altBytes, Bytes.toBytes(cells[4]));
+            put.addColumn(cf1Bytes, qualBytes, Bytes.toBytes(cells[5]));
+            put.addColumn(cf1Bytes, filterBytes, Bytes.toBytes(cells[6]));
+            put.addColumn(cf1Bytes, infoBytes, Bytes.toBytes(cells[7]));
+//            put.addColumn(cf1Bytes, formatBytes, Bytes.toBytes(cells[8]));
+            put.addColumn(cf1Bytes, sampleBytes, (new VcfFormatFields(cells[8], cells[9])).serialize());
+            return put;	
         }
     }
+    
 
-    // @Test
-    public void getPutTest() throws Exception {
+    @Test
+    public void test4BulkGet() throws Exception {
         try {
             List<byte[]> list = new ArrayList<>();
-            list.add(Bytes.toBytes("1"));
-            list.add(Bytes.toBytes("2"));
-            list.add(Bytes.toBytes("3"));
-            list.add(Bytes.toBytes("4"));
-            list.add(Bytes.toBytes("5"));
+            list.add(Bytes.toBytes("chr1:875063:G/."));
+            list.add(Bytes.toBytes("chr10:101419628:G/."));
+            list.add(Bytes.toBytes("chr10:101419712:C/."));
+//            list.add(Bytes.toBytes("4"));
+            list.add(Bytes.toBytes("chr1:1386020:G/A"));
 
             JavaRDD<byte[]> rdd = sc.parallelize(list);
             // Configuration conf = HBaseConfiguration.create();
 
             JavaHBaseContext hbaseContext = new JavaHBaseContext(sc, configuration);
-
             hbaseContext.foreachPartition(rdd, new VoidFunction<Tuple2<Iterator<byte[]>, Connection>>() {
                 @Override
                 public void call(Tuple2<Iterator<byte[]>, Connection> t) throws Exception {
                     Table table = t._2().getTable(TableName.valueOf(tableName));
-                    BufferedMutator mutator = t._2().getBufferedMutator(TableName.valueOf(tableName));
-
+                    File file = new File ("test.vcf");
+                    FileWriter fw = new FileWriter(file.getAbsoluteFile());
+                    System.out.println("writing to file: " + file.getAbsolutePath());
+        			BufferedWriter bw = new BufferedWriter(fw);
+        			int rowCount = 0;
                     while (t._1().hasNext()) {
                         byte[] b = t._1().next();
                         Result r = table.get(new Get(b));
-                        // getExists() may return null...
-                        Boolean exists = r.getExists();
-                        if (exists != null && exists) {
-                            mutator.mutate(new Put(b));
+                        byte[] rb = r.getValue(cf1Bytes, chrBytes);
+                        if (rb!=null) {
+                        	StringBuffer buf = new StringBuffer();
+                        	String cVal = Bytes.toString(rb);
+                        	buf.append(cVal)
+                        	   .append("\t").append(Bytes.toString(r.getValue(cf1Bytes, posBytes)))
+                        	   .append("\t").append(Bytes.toString(r.getValue(cf1Bytes, idBytes)))
+                        	   .append("\t").append(Bytes.toString(r.getValue(cf1Bytes, refBytes)))
+                        	   .append("\t").append(Bytes.toString(r.getValue(cf1Bytes, altBytes)))
+                        	   .append("\t").append(Bytes.toString(r.getValue(cf1Bytes, qualBytes)))
+                        	   .append("\t").append(Bytes.toString(r.getValue(cf1Bytes, filterBytes)))
+                        	   .append("\t").append(Bytes.toString(r.getValue(cf1Bytes, infoBytes)))
+                        	   .append("\t").append(VcfFormatFields.deserialize(r.getValue(cf1Bytes, sampleBytes)).toString())
+                        	   .append("\n");
+                        	bw.write(buf.toString());
+                        	rowCount++;
                         }
                     }
-
-                    mutator.flush();
-                    mutator.close();
+                    bw.close();
                     table.close();
+                    System.err.println("total vcf files written: " + rowCount);
                 }
             });
         } finally {
-            sc.stop();
+//            sc.stop();
         }
-
-        // go look at what the heck is in the table
-        System.err.println("*************************************************");
-        Result[] r = hutil.first(tableName, 1000);
-        List<String> pretty = hutil.format(r);
-        for (String next : pretty) {
-            System.err.println(next);
-        }
+        
+        System.err.println("Testing bulkGet succeeded");
     }
 
+    
+    private List<String> readGVCF (String inFileVCF, int rowNum) throws Exception {
+		BufferedReader br = null;
+		if (inFileVCF.endsWith(".gz")) {
+			MultiMemberGZIPInputStream gin = new MultiMemberGZIPInputStream(new FileInputStream(inFileVCF)); 
+			
+			InputStreamReader xover = new InputStreamReader(gin);
+		    br = new BufferedReader(xover);
+		}
+		else {
+			FileInputStream fstream = new FileInputStream(inFileVCF);
+			DataInputStream in = new DataInputStream(fstream);
+			br = new BufferedReader(new InputStreamReader(in));
+		}
+		
+		List<String> retList = new java.util.ArrayList<String>(rowNum);
+		String strLine;
+		int rowCount = 0;
+		boolean headerRead = false;
+		while ((strLine = br.readLine()) != null) {
+			if (headerRead) {
+				rowCount++;
+				if (rowCount>rowNum) break;
+				retList.add(strLine);
+			}
+			else {
+				if (strLine.startsWith("#CHROM")) {
+					headerRead = true;
+				}
+			}
+		}
+		br.close();
+		return retList;
+    }
+    
+    @Test
+    public void test3BulkGet () throws Exception {
+        List<byte[]> list = new ArrayList<>();
+        list.add(Bytes.toBytes("chr1:875063:G/."));
+        list.add(Bytes.toBytes("chr10:101419628:G/."));
+        list.add(Bytes.toBytes("chr10:101419712:C/."));
+        list.add(Bytes.toBytes("chr1:1386020:G/A"));
+System.err.println("running test4BulkGet");
+        JavaRDD<byte[]> rdd = sc.parallelize(list);
+        JavaHBaseContext hbaseContext = new JavaHBaseContext(sc, configuration);
+        JavaRDD<String> rdd2 = hbaseContext.bulkGet(TableName.valueOf(tableName), 2, rdd, new GetFunction(), new ResultFunction());
+        List<String> resultList = rdd2.collect();
+        for (int i=0; i< resultList.size(); i++) {
+        	if (resultList.get(i)!=null) {
+        		System.err.println(resultList.get(i));
+        	}
+        }
+System.err.println("end test4BulkGet");
+    }
+    
     public static class GetFunction implements Function<byte[], Get> {
-        private static final long serialVersionUID = 1L;
-        @Override
-        public Get call(byte[] v) throws Exception {
-            return new Get(v);
-        }
+    	private static final long serialVersionUID = 1L;
+    	public Get call(byte[] v) throws Exception {
+    		return new Get(v);
+    	}
     }
+    
+    public static class ResultFunction implements Function<Result,String> {
+    	private static final long serialVersionUID = 1L;
+    	public String call(Result result) throws Exception {
+//    		Iterator <Cell> it = result.listCells().iterator();
+    		StringBuffer buf = new StringBuffer();
+//    		buf.append(Bytes.toString(result.getRow())).append(":");
+//    		while (it.hasNext()) {
+//    			Cell cell = it.next();
+//				buf.append(Bytes.toString(cell.getQualifier())).append("=").append(Bytes.toString(cell.getValue())).append("; ");
+//    		}
+    		String ret = VcfFormatFields.toVCF(result);
+    		return ret;
+    	}
+    	
+    }
+    
 
 }
