@@ -106,8 +106,10 @@ public class VCFParserConfig {
      */
     public SparkConf getSparkConfiguration() {
         // todo: use Dan's spark auto configure from hadoopcommons
-        SparkConf sconf = new SparkConf().setMaster("local").setAppName("Spark-Hbase Connector");
-        sconf.set("spark.driver.host", "127.0.0.1");
+        // SparkConf sconf = new
+        // SparkConf().setMaster("local").setAppName("Spark-Hbase Connector");
+        // sconf.set("spark.driver.host", "127.0.0.1");
+        SparkConf sconf = new SparkConf().setAppName("Spark-Hbase Connector");
         return sconf;
 
     }
