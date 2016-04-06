@@ -1,9 +1,9 @@
-.PHONY: help setup build npm
 define help
 
-BigData4Genomics
+Genomics Warehouse
 
 documentation:
+  install   - build apps and install on test cluster (use SSH )
   setup   - install gitbook, assumes Node / npm are installed
   build   - build the documentation, in documentation/static
   watch   - watch for documentation changes, serves on http://localhost:4000
@@ -14,6 +14,17 @@ export help
 
 help:
 	@echo "$$help"
+
+
+
+# Set the SSH target if not already set
+install:
+	# (cd gwarehouse && mvn package)
+	rsync -r devops/ darkhorse:DJB/
+	rsync -r --delete warehouse/target/lib darkhorse:DJB/
+	rsync -r warehouse/target/warehouse-1.0-SNAPSHOT.jar darkhorse:DJB/
+
+
 
 # Documentation
 setup: node_modules/gitbook-cli
@@ -34,3 +45,4 @@ open:
 clean:
 	rm -rf doc/_book
 
+.PHONY: help setup build npm install

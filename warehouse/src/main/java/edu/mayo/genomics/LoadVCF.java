@@ -29,14 +29,13 @@ public class LoadVCF {
 
             VCFParserConfig config;
             try (InputStream stream = LoadVCF.class.getResourceAsStream("/VCFParser.properties")) {
-                logger.info("Loading properties from stream: " + stream);
                 config = new VCFParserConfig(stream);
             }
 
             VCFParser parser = new VCFParser(config);
             parser.parse(filename, VCFParserConfig.getTableName());
 
-            Result[] results = hutil.first(VCFParserConfig.getTableName(), 1000);
+            Result[] results = hutil.first(VCFParserConfig.getTableName(), 10);
             List<String> pretty = hutil.format(results);
             int i = 0;
             for (String line : pretty) {

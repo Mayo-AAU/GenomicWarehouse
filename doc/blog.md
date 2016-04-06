@@ -1,3 +1,11 @@
+# 2016-04-01 - DJB
+
+Running LoadVCF on a .gvcf file stored in HDFS (whew!).
+
+```
+./LoadVCF hdfs://master3:8020/user/sandbox/vcf/NA_1401601611.gvcf.bz2
+```
+
 # 2016-02-15 - DJB
 
 Trying to install Cloudbreak via the [Azure "one-click" installer](http://sequenceiq.com/cloudbreak-docs/latest/azure/).  However, Azure puked with an error about passwords (why they let it be entered incorrectly?!?):
