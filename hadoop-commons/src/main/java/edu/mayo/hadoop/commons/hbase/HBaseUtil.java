@@ -9,6 +9,8 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
@@ -199,6 +201,16 @@ public class HBaseUtil {
             return scanner.next(n);
         }
     }
+    
+    public Result[] firstWitFilter (String tableName, String prefix, int n) throws IOException {
+    	try (Table table = connection.getTable(TableName.valueOf(tableName))) {
+        	Filter prefixFilter = new PrefixFilter(Bytes.toBytes(prefix));
+        	Scan scan = new Scan (Bytes.toBytes(prefix));
+        	scan.setFilter(prefixFilter);
+        	ResultScanner rscan = table.getScanner(scan);
+        	return rscan.next(n);
+    	}
+    }
 
     /**
      * format a set of results to whatever output the caller specifies (pretty print)
@@ -302,6 +314,23 @@ public class HBaseUtil {
         }
     }
 
+    /**
+     * drop the specified table if it exists
+     * @param tableName
+     * @throws IOException
+     */
+    public void dropTable (String tableName) throws IOException {
+    	TableName tbName = TableName.valueOf(tableName);
+        try (Admin admin = connection.getAdmin()) {
+        	if (admin.tableExists(tbName)) {
+                admin.disableTable(tbName);
+                admin.deleteTable(tbName);
+            }
+        	admin.close();
+        }
+    }
+
+    
     /**
      * simple method that works on a small amount of data to check if a given row exists in hbase
      * @param table
