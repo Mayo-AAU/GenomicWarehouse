@@ -60,7 +60,7 @@ public class VcfFormatFields implements Serializable {
 	
 	public static VcfFormatFields deserialize (byte[] bytes) throws IOException, ClassNotFoundException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-		ObjectInput in = null;
+		ObjectInput in = null; 
 		try {
 			  in = new ObjectInputStream(bis);
 			  @SuppressWarnings("unchecked")
