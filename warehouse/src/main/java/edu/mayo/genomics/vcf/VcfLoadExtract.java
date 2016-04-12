@@ -1,5 +1,6 @@
 package edu.mayo.genomics.vcf;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.spark.JavaHBaseContext;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -33,11 +35,11 @@ import scala.Tuple2;
  */
 public class VcfLoadExtract {
     private static final String tableName = "GvcfTable";
-    private static SparkConf sconf;
-    private static JavaSparkContext sc;
-    private static Configuration configuration;
-    private static Connection hconnect;
-    private static HBaseUtil hutil;
+    private SparkConf sconf;
+    private JavaSparkContext sc;
+    private Configuration configuration;
+    private Connection hconnect;
+    private HBaseUtil hutil;
     private static String gvcfCol = "gvcf";
     private static String gvcfCF = "gvcfCF";
     private static byte[] gvcfColBytes = Bytes.toBytes(gvcfCol);
@@ -46,23 +48,36 @@ public class VcfLoadExtract {
 	private static int sampleCol = 9;
 	private static int infoCol = 7;
 	private static int posCol = 1;
+    private static final Logger logger = Logger.getLogger(VcfLoadExtract.class);
 	
-	public static void init () throws Exception {
-        sconf = new SparkConf().setMaster("local").setAppName("Spark-Hbase Connector");
-        sconf.set("spark.driver.host", "127.0.0.1");
+	public void init (boolean cluster) throws Exception {
+		if (cluster) {
+			sconf = new SparkConf().setAppName("Spark-Hbase Connector");
+			sconf.set("spark.driver.host", "127.0.0.1");
+		}
+		else {
+			sconf = new SparkConf().setMaster("local").setAppName("Spark-Hbase Connector");
+			sconf.set("spark.driver.host", "127.0.0.1");
+		}
         sc = new JavaSparkContext(sconf);
         configuration = AutoConfigure.getConfiguration();
         hconnect = ConnectionFactory.createConnection(configuration);
         hutil = new HBaseUtil(hconnect);
-        hutil.dropTable(tableName);
+//        hutil.dropTable(tableName);
         hutil.createTable(tableName, new String[] { gvcfCF});
     }
 	
-	public static void stop () throws Exception {
+	/**
+	 * must call this method to shut down mini cluster appropriately
+	 * @throws Exception
+	 */
+	public void stop (boolean cluster) throws Exception {
         sc.close();
     	sc.stop();
         hconnect.close();
-        AutoConfigure.stop();
+        if (!cluster) {
+	        AutoConfigure.stop();
+		}
 	}
     
     /**
@@ -79,7 +94,6 @@ public class VcfLoadExtract {
     }
 
     public void loadVcfFile (String sampleID, String filePath)  throws Exception {
-    	System.err.println ("*********************************");
     	JavaRDD<String> rdd = sc.textFile(filePath)
     			.filter(s -> !s.startsWith("#") )
     			.mapToPair(line -> new Tuple2<String, String> (getBucketID(line), line))
@@ -175,7 +189,7 @@ public class VcfLoadExtract {
         JavaHBaseContext hbaseContext = new JavaHBaseContext(sc, configuration);
         
         // for now we have one row per sample per chr.
-        JavaRDD<String> rdd2 = hbaseContext.bulkGet(TableName.valueOf(tableName), 2, rdd, new GetFunction(), new ResultFunction())
+        JavaRDD<String> rdd2 = hbaseContext.bulkGet(TableName.valueOf(tableName), 2, rdd, new GetGvcf(), new ResultGvcf())
         		.filter(x -> x!=null)
         		.mapToPair( x -> new Tuple2<String,String>(x.substring(0, x.indexOf("##")).split("\t")[0], x))
 				.reduceByKey((x,y)-> x + "@@" + y)
@@ -334,14 +348,14 @@ public class VcfLoadExtract {
     }
     
     
-    private static class GetFunction implements Function<String, Get> {
+    private static class GetGvcf implements Function<String, Get> {
     	private static final long serialVersionUID = 1L;
     	public Get call(String v) throws Exception {
     		return new Get(Bytes.toBytes(v));
     	}
     }
     
-    private static class ResultFunction implements Function<Result,String> {
+    private static class ResultGvcf implements Function<Result,String> {
     	private static final long serialVersionUID = 1L;
     	public String call(Result result) throws Exception {
     		String key = Bytes.toString(result.getRow());
@@ -353,4 +367,83 @@ public class VcfLoadExtract {
     	
     }
   
+    public static void main (String[] args) throws Exception {
+    	boolean exit = false;
+    	String cmd = null;
+    	String runInCluster = "false";
+    	if (args.length < 2) {
+    		exit = true;
+    	}
+    	else {
+    		cmd = args[0];
+    		runInCluster = args[1];
+    	}
+    	if (args.length < 3 && (exit || cmd.equalsIgnoreCase("load"))) {
+    		logger.info("Usage: java ... VcfLoadExtract load true/false vcfFiles");
+    		exit = true;
+    	}
+    	else if (args.length < 4 && (exit || cmd.equalsIgnoreCase("extract"))) {
+    		logger.info("Usage: java ... VcfLoadExtract extract true/false sampleIds outputFile");
+    		exit = true;
+    	}
+    	if (!exit) {
+    		logger.info("initializing spark context...");
+    		VcfLoadExtract vLE = new VcfLoadExtract();
+    		try {
+    			vLE.init(runInCluster.equalsIgnoreCase("true"));
+	 	    	if (cmd.equalsIgnoreCase("load")) {
+		    		vLE.loadVcfFiles (args[2]);
+		    	}
+		    	else if (cmd.equalsIgnoreCase("extract")) {
+		    		vLE.extractIntoVcfFile (args[2], args[3]);
+		    	}
+		    	else throw new Exception ("Invalid cmd " + cmd + ", valid cmd: load, extract");
+	    	}
+    		finally {
+    			vLE.stop (runInCluster.equalsIgnoreCase("true"));
+    		}
+    	}
+    }
+    
+    private void loadVcfFiles (String files) throws Exception{
+    	String [] fileList = files.split(",");
+    	int failedCount = 0;
+    	logger.info("starting to load these gvcf/vcf files: " + files);
+    	for (String file: fileList) {
+    		try {
+	    		String sampleID = file;
+	    		int idx = sampleID.lastIndexOf(File.separator);
+	    		if (idx >= 0) {
+	    			sampleID = sampleID.substring(idx+1);
+	    		}
+	    		idx = sampleID.lastIndexOf(".");
+	    		if (idx >= 0) {
+	    			sampleID = sampleID.substring(0, idx);
+	    		}
+	    		logger.info("loading vcf file " + file + " with sampleID: " + sampleID);
+	    		this.loadVcfFile(sampleID, file);
+    		}
+    		catch (Exception e) {
+    			logger.error("failed laoding vcf file " + file, e);
+    			failedCount++;
+    		}
+    	}
+    	if (failedCount>0) {
+    		throw new Exception ("Failed vcf load on " + failedCount + " out of total of " + fileList.length + " vcf files");
+    	}
+    }
+    
+    private void extractIntoVcfFile (String sampleIds, String outFile) throws Exception {
+    	String[] sampleIdList = sampleIds.split(",");
+    	VcfLoadExtract vLE = new VcfLoadExtract();
+		String[] chrList = new String[] {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25"};
+		logger.info("extracting samples into vcf file: " + outFile);
+		try {
+			vLE.extractVCF(chrList, sampleIdList, outFile);
+		}
+		catch (Exception e) {
+			logger.error("failed vcf extract for samples " + sampleIds, e);
+			throw e;
+		}
+    }
 }
