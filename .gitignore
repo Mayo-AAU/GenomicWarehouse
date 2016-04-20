@@ -15,6 +15,6 @@ embedded_hbase
 embedded_zk
 /build/
 .gradle
-/bin/
+**/bin/
 *.log*
 *gvcf.gz
