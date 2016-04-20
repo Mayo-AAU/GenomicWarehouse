@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# A simple shell script to launch the "TestLoadExtractVCF" job on the cluster.
+#
+# an example would be:
+# ./TestLoadExtractVCF load hdfs://master3:8020/user/sandbox/vcf/06-007210_1606203638.original.gvcf.gz
+# ./TestLoadExtractVCF extract hdfs://master3:8020/user/sandbox/vcfOut/out1.vcf 06-007210_1606203638,06-007210_1606203638,06-007210_1606203640 true
+
+
+# Construct the classpath
+
+CLASSPATH=$(ls -1 lib/*.jar | paste -sd ":" -):warehouse-1.0-SNAPSHOT.jar
+
+# Spark JAR files should be comma delimited
+JARS=$(ls -1 lib/*.jar | paste -sd "," -)
+
+# Debugging port
+PORT=4747
+if [[ -v DEBUG ]]; then
+    DEBUG_ARGS=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=$PORT
+else
+    DEBUG_ARGS=""
+fi
+    
+# exec java -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=$PORT  -classpath $CLASSPATH edu.mayo.genomics.CreateSchema
+# exec java $JVM_ARGS $DEBUG_ARGS -classpath $CLASSPATH edu.mayo.genomics.LoadVCF "$@"
+
+#    --master yarn \
+#    --master spark://master1:7077 \
+#    --deploy-mode cluster \
+
+spark-submit \
+    --name "TestLoadGvcfFiles" \
+    --class edu.mayo.genomics.vcf.VcfLoadExtract \
+    --master yarn-client \
+    --executor-memory 512M \
+    --num-executors 12 \
+    --jars "$JARS" \
+    --conf spark.eventLog.enabled=false \
+    --conf "spark.executor.extraJavaOptions=-XX:+PrintGCDetails -XX:+PrintGCTimeStamps" \
+    warehouse-1.0-SNAPSHOT.jar "$1" true "$2" "$3" 
+
